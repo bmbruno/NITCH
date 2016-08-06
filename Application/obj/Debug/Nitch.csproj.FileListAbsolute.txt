@@ -1,0 +1,2 @@
+D:\Projects\nitch\Nitch\bin\Debug\Nitch.exe.config
+D:\Projects\nitch\Application\bin\Debug\Nitch.exe.config
