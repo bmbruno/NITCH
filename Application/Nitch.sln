@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nitch", "Nitch.csproj", "{2985B68C-58C1-4063-BEBA-14619E4E5C95}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParamParser", "..\ParamParser\ParamParser.csproj", "{A928C580-E358-4294-96B5-741A36F72EC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{2985B68C-58C1-4063-BEBA-14619E4E5C95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2985B68C-58C1-4063-BEBA-14619E4E5C95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2985B68C-58C1-4063-BEBA-14619E4E5C95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A928C580-E358-4294-96B5-741A36F72EC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A928C580-E358-4294-96B5-741A36F72EC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A928C580-E358-4294-96B5-741A36F72EC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A928C580-E358-4294-96B5-741A36F72EC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
