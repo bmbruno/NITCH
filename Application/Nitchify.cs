@@ -15,9 +15,15 @@ namespace Nitch
     {
         private const string _OUTPUT_DIR_NAME = "_nitch";
 
+        #region Members
+
         private string _rootFolder { get; set; }
         
         public PathingMode Pathing { get; set; }
+
+        #endregion
+
+        #region Constructors
 
         public Nitchify(string rootFolder, PathingMode pathing = PathingMode.Relative)
         {
@@ -39,6 +45,11 @@ namespace Nitch
             this.Pathing = pathing;
         }
 
+        #endregion
+
+        /// <summary>
+        /// Kicks off the Nitchify compilation process.
+        /// </summary>
         public void Build()
         {
             Console.WriteLine("Starting website build...");
@@ -49,13 +60,21 @@ namespace Nitch
             // Load all HTML files in and under root directory
             List<string> htmlFiles = LoadSourceFiles(_rootFolder);
 
-            // TODO: Iterate over all files; process include: tokens
+            foreach (string file in htmlFiles)
+            {
+                string rawFileOutput = ProcessFile(file, file);
+            }
 
             Console.WriteLine($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
 
             Console.WriteLine("Build complete!");
         }
 
+        /// <summary>
+        /// Recursively Loads all .html files from a root path.
+        /// </summary>
+        /// <param name="rootPath">Starting folder path.</param>
+        /// <returns>List of filepaths.</returns>
         private List<string> LoadSourceFiles(string rootPath)
         {
             List<string> files = new List<string>();
@@ -73,6 +92,19 @@ namespace Nitch
             }
 
             return files;
+        }
+
+        private string ProcessFile(string file, string sourceFile)
+        {
+            // TODO: Open 'file', read into buffer
+
+            // TODO: Scan for {{include:}} token
+
+            // TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values
+
+            // TODO: Scan for {{file:}} tokens, process each (as absolute or relative, to sourceFile)
+
+            return string.Empty;
         }
     }
 }

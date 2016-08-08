@@ -1,9 +1,0 @@
-D:\Projects\nitch\Nitch\bin\Debug\Nitch.exe.config
-D:\Projects\nitch\Application\bin\Debug\Nitch.exe.config
-D:\Projects\nitch\Application\bin\Debug\Nitch.exe
-D:\Projects\nitch\Application\bin\Debug\Nitch.pdb
-D:\Projects\nitch\Application\obj\Debug\Nitch.csprojResolveAssemblyReference.cache
-D:\Projects\nitch\Application\obj\Debug\Nitch.exe
-D:\Projects\nitch\Application\obj\Debug\Nitch.pdb
-D:\Projects\nitch\Application\bin\Debug\ParamParser.dll
-D:\Projects\nitch\Application\bin\Debug\ParamParser.pdb
