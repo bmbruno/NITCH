@@ -52,15 +52,22 @@ namespace Nitch
                     // Get token value (parse the string)
                     string tokenValue = GetTokenValue(rawToken);
 
-                    Token newToken = new Token()
+                    if (!String.IsNullOrEmpty(tokenValue))
                     {
-                        Type = Infrastructure.Enumerations.TokenType.Include,
-                        Value = "",
-                        RawValue = rawToken,
-                        PositionInFile = startPos
-                    };
+                        Token newToken = new Token()
+                        {
+                            Type = Infrastructure.Enumerations.TokenType.Include,
+                            Value = tokenValue,
+                            RawValue = rawToken,
+                            PositionInFile = startPos
+                        };
 
-                    _tokens.Add(newToken);
+                        _tokens.Add(newToken);
+                    }
+                    else
+                    {
+                        Log.Warning($"Token parse error at position: {startPos}");
+                    }
                 }
                 else
                 {
@@ -131,12 +138,24 @@ namespace Nitch
 
         }
 
+        /// <summary>
+        /// Gets the value of a token based on the ':' delimiter.
+        /// </summary>
+        /// <param name="rawToken">Token string to parse.</param>
+        /// <returns>String of the token's value; returns empty string if token parse errors</returns>
         private string GetTokenValue(string rawToken)
         {
-            int startPos = rawToken.IndexOf(":") + 2;
-            int lengthToCut = rawToken.IndexOf("\"}}") - startPos;
+            try
+            {
+                int startPos = rawToken.IndexOf(value: ":", startIndex: 0) + 2;
+                int lengthToCut = rawToken.IndexOf("\"}}") - startPos;
 
-            return rawToken.Substring(startPos, lengthToCut);
+                return rawToken.Substring(startPos, lengthToCut);
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
     }
 }
