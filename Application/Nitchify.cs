@@ -97,8 +97,10 @@ namespace Nitch
         private string ProcessFile(string file, string sourceFile)
         {
             // TODO: Open 'file', read into buffer
+            string fileBuffer = File.ReadAllText(file);
 
             // TODO: Scan for {{include:}} token
+
 
             // TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values
 

@@ -43,11 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Infrastructure\ConfigurationLoader.cs" />
+    <Compile Include="Infrastructure\Enumerations\TokenType.cs" />
     <Compile Include="Infrastructure\Enumerations\PathingMode.cs" />
+    <Compile Include="Models\Token.cs" />
     <Compile Include="Nitchify.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tokenizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

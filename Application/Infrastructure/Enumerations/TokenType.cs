@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nitch.Infrastructure
+namespace Nitch.Infrastructure.Enumerations
 {
-    class ConfigurationLoader
+    public enum TokenType
     {
-        
+        Include = 0,
+        File = 1
     }
 }
