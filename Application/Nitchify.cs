@@ -1,4 +1,5 @@
-﻿using Nitch.Infrastructure.Enumerations;
+﻿using Nitch.Infrastructure;
+using Nitch.Infrastructure.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -56,15 +57,18 @@ namespace Nitch
 
             Console.WriteLine($"Root Folder: {_rootFolder}");
             Console.WriteLine($"File pathing: {Pathing.ToString()}");
+            Console.Write("\n");
 
             // Load all HTML files in and under root directory
             List<string> htmlFiles = LoadSourceFiles(_rootFolder);
 
             foreach (string file in htmlFiles)
             {
+                Log.Info($"Building file: {file}");
                 string rawFileOutput = ProcessFile(file, file);
             }
 
+            Console.Write("\n");
             Console.WriteLine($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
 
             Console.WriteLine("Build complete!");
@@ -96,11 +100,17 @@ namespace Nitch
 
         private string ProcessFile(string file, string sourceFile)
         {
-            // TODO: Open 'file', read into buffer
+            // Open 'file', read into buffer; empty files should not be processed
             string fileBuffer = File.ReadAllText(file);
 
-            // TODO: Scan for {{include:}} token
+            if (fileBuffer.Trim().Length == 0)
+                return string.Empty;
 
+            // TODO: Scan for {{include:}} token
+            Tokenizer tokenizer = new Tokenizer(fileBuffer);
+            tokenizer.Process();
+
+            var list = tokenizer.GetTokenList();
 
             // TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values
 

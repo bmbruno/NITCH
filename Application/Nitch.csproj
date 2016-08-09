@@ -45,6 +45,8 @@
   <ItemGroup>
     <Compile Include="Infrastructure\Enumerations\TokenType.cs" />
     <Compile Include="Infrastructure\Enumerations\PathingMode.cs" />
+    <Compile Include="Infrastructure\Helpers\StringExtensions.cs" />
+    <Compile Include="Infrastructure\Log.cs" />
     <Compile Include="Models\Token.cs" />
     <Compile Include="Nitchify.cs" />
     <Compile Include="Program.cs" />

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nitch.Infrastructure.Helpers;
+using Nitch.Infrastructure;
 
 namespace Nitch
 {
@@ -38,13 +40,39 @@ namespace Nitch
         /// </summary>
         public void Process()
         {
+            IEnumerable<int> allIncludeIndexes = _fileContents.AllIndexesOf("{{include:");
 
+            foreach (int startPos in allIncludeIndexes)
+            {
+                // Get and build token at this location
+                string rawToken = GetTokenRawString(startPos);
+
+                if (!String.IsNullOrEmpty(rawToken))
+                {
+                    // Get token value (parse the string)
+                    string tokenValue = GetTokenValue(rawToken);
+
+                    Token newToken = new Token()
+                    {
+                        Type = Infrastructure.Enumerations.TokenType.Include,
+                        Value = "",
+                        RawValue = rawToken,
+                        PositionInFile = startPos
+                    };
+
+                    _tokens.Add(newToken);
+                }
+                else
+                {
+                    Log.Warning($"Invalid token at position: {startPos.ToString()}");
+                }
+            }
         }
 
         /// <summary>
         /// Gets the full list of tokens.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of Token objects.</returns>
         public List<Token> GetTokenList()
         {
             return _tokens;
@@ -82,6 +110,33 @@ namespace Nitch
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Given the starting position of a token, returns the full token based on the standard closing delimiter }}.
+        /// </summary>
+        /// <param name="startPosition">Starting position of token</param>
+        /// <returns>Full string of token, including delimiter characters {{ }}; returns empty string if no token found.</returns>
+        private string GetTokenRawString(int startPosition)
+        {
+            try
+            {
+                int lengthToCut = ((_fileContents.IndexOf(value: "}}", startIndex: startPosition)) - startPosition) + 2;
+                return _fileContents.Substring(startPosition, lengthToCut);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+
+        }
+
+        private string GetTokenValue(string rawToken)
+        {
+            int startPos = rawToken.IndexOf(":") + 2;
+            int lengthToCut = rawToken.IndexOf("\"}}") - startPos;
+
+            return rawToken.Substring(startPos, lengthToCut);
         }
     }
 }
