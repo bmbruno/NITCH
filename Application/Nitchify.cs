@@ -55,7 +55,7 @@ namespace Nitch
         /// </summary>
         public void Build()
         {
-            Console.WriteLine("Starting website build...");
+            Log.Info("Starting website build...");
 
             Console.WriteLine($"Root Folder: {_rootFolder}");
             Console.WriteLine($"File pathing: {Pathing.ToString()}");
@@ -71,8 +71,8 @@ namespace Nitch
             }
 
             Console.Write("\n");
-            Console.WriteLine($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
-            Console.WriteLine("Build complete!");
+            Log.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
+            Log.Info("Build complete!");
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Nitch
         /// <param name="startPath"></param>
         public void Create()
         {
-            Console.WriteLine("Creating default website structure...");
+            Log.Info("Creating default website structure...");
 
             string newProjectFolder = "new_website_project";
             string[] rootFolders = { "master", "content" };
@@ -138,6 +138,8 @@ namespace Nitch
                 {
                     File.WriteAllText(masterFilePath, DefaultFiles.masterHTML);
                 }
+
+                Log.Info("Created files.");
             }
             catch (Exception exc)
             {

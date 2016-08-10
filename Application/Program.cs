@@ -22,6 +22,7 @@ namespace Nitch
 
             Console.WriteLine("NITCH (.NET Integrated Template Compiler for HTML)");
             Console.WriteLine($"Version: {AppVersion}");
+            Console.Write("\n");
 
             //
             // PROGRAM ARGUMENTS
