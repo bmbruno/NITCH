@@ -17,8 +17,6 @@ namespace Nitch
 
         private string _fileContents { get; set; }
 
-        private int _listPosition { get; set; }
-
         #endregion
 
         #region Constructors
@@ -30,19 +28,23 @@ namespace Nitch
 
             _fileContents = content;
             _tokens = new List<Token>();
-            _listPosition = 0;
         }
 
         #endregion
         
         /// <summary>
-        /// Processes the file and gets all tokens.
+        /// Parse the file contents for tokens of the given type and populates the internal token list.
         /// </summary>
-        public void Process()
+        public void Process(string token)
         {
-            IEnumerable<int> allIncludeIndexes = _fileContents.AllIndexesOf("{{include:");
+            if (_tokens != null && _tokens.Count > 0)
+            {
+                Reset();
+            }
 
-            foreach (int startPos in allIncludeIndexes)
+            IEnumerable<int> allTokenIndexes = _fileContents.AllIndexesOf(token);
+
+            foreach (int startPos in allTokenIndexes)
             {
                 // Get and build token at this location
                 string rawToken = GetTokenRawString(startPos);
@@ -85,38 +87,9 @@ namespace Nitch
             return _tokens;
         }
 
-        /// <summary>
-        /// Gets the next token in the token list. Returns null if at the end of the list. Updates position in list.
-        /// </summary>
-        /// <returns>Token object. Null if at end of list.</returns>
-        public Token GetNextToken()
+        private void Reset()
         {
-            if ((_listPosition + 1) <= _tokens.Count)
-            {
-                _listPosition += 1;
-                return _tokens[_listPosition];
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Gets the first token in the token list. Returns null if the list is empty. Updates position in list.
-        /// </summary>
-        /// <returns></returns>
-        public Token GetFirstToken()
-        {
-            if (_tokens.Count > 0)
-            {
-                _listPosition = 0;
-                return _tokens[_listPosition];
-            }
-            else
-            {
-                return null;
-            }
+            _tokens = new List<Token>();
         }
 
         /// <summary>

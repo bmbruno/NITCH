@@ -1,4 +1,5 @@
-﻿using ParamParser;
+﻿using Nitch.Infrastructure.Helpers;
+using ParamParser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace Nitch
         static void Main(string[] args)
         {
             string AppVersion = "0.25";
+            string appPath = FileHelper.GetCurrentApplicationDirectory();
 
             Console.WriteLine("NITCH (.NET Integrated Template Compiler for HTML)");
             Console.WriteLine($"Version: {AppVersion}");
@@ -31,11 +33,15 @@ namespace Nitch
             {
                 if (String.IsNullOrEmpty(parser.GetParam("create")))
                 {
-                    // TODO: Run default project structure creator
+                    // Run default project file/folder creation
+                    Nitchify builder = new Nitchify(appPath);
+                    builder.Create();
                 }
                 else
                 {
-                    // TODO: Run project structure creator based on config settings (config must be next to executable)
+                    // Run project file/folder creation at the given path
+                    Nitchify builder = new Nitchify(parser.GetParam("create"));
+                    builder.Create();
                 }
             }
 
@@ -43,7 +49,9 @@ namespace Nitch
             {
                 if (String.IsNullOrEmpty(parser.GetParam("build")))
                 {
-                    // TODO: Run default build in the current folder
+                    // Run default build in the current folder
+                    Nitchify builder = new Nitchify(appPath, Infrastructure.Enumerations.PathingMode.Absolute);
+                    // builder.Build(); // TODO: uncomment this line
                 }
                 else
                 {
@@ -60,15 +68,6 @@ namespace Nitch
                         return;
                     }
                 }
-            }
-            else
-            {
-                // Run default build in the current folder
-                string appLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                string appPath = System.IO.Path.GetDirectoryName(appLocation);
-
-                Nitchify builder = new Nitchify(appPath, Infrastructure.Enumerations.PathingMode.Absolute);
-                // builder.Build(); // TODO: uncomment this line
             }
         }
     }

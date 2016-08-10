@@ -36,13 +36,13 @@ namespace ParamParser
         /// <param name="args">args array from program Main()</param>
         public void Parse(string[] args)
         {
-            for (var i = 0; i <( args.Length - 1); i++)
+            for (var i = 0; i < args.Length; i++)
             {
-                if ((args[i][0] == '-') && (args[i + 1] != null) && (args[i + 1][0] != '-'))
+                if ((args[i][0] == '-') || (args[i][0] == '/'))
                 {
                     Parameters.Add(
-                        args[i].Replace("-", string.Empty),
-                        args[i + 1]
+                        args[i].Replace("-", string.Empty).Replace("/", string.Empty),
+                        (args.Length > (i + 1)) ? args[i + 1] : null
                     );
                 }
             }

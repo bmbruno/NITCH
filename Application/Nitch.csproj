@@ -43,8 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\DefaultFiles.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DefaultFiles.resx</DependentUpon>
+    </Compile>
     <Compile Include="Infrastructure\Enumerations\TokenType.cs" />
     <Compile Include="Infrastructure\Enumerations\PathingMode.cs" />
+    <Compile Include="Infrastructure\Helpers\FileHelper.cs" />
     <Compile Include="Infrastructure\Helpers\StringExtensions.cs" />
     <Compile Include="Infrastructure\Log.cs" />
     <Compile Include="Models\Token.cs" />
@@ -61,6 +67,12 @@
       <Project>{A928C580-E358-4294-96B5-741A36F72EC4}</Project>
       <Name>ParamParser</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Infrastructure\DefaultFiles.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DefaultFiles.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

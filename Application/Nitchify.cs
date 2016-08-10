@@ -1,5 +1,7 @@
 ﻿using Nitch.Infrastructure;
 using Nitch.Infrastructure.Enumerations;
+using Nitch.Infrastructure.Helpers;
+using Nitch.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -70,8 +72,80 @@ namespace Nitch
 
             Console.Write("\n");
             Console.WriteLine($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
-
             Console.WriteLine("Build complete!");
+        }
+
+        /// <summary>
+        /// Creates a default project structure, including basic folders and various HTML files to demonstrate the functionality of Nitch.
+        /// </summary>
+        /// <param name="startPath"></param>
+        public void Create()
+        {
+            Console.WriteLine("Creating default website structure...");
+
+            string newProjectFolder = "new_website_project";
+            string[] rootFolders = { "master", "content" };
+            string[] contentFolders = { "css", "scripts", "images" };
+
+            // Handle possible duplicate folder names
+            int counter = 0;
+            string defaultName = newProjectFolder;
+            while (Directory.Exists(Path.Combine(_rootFolder, newProjectFolder)))
+            {
+                counter += 1;
+                newProjectFolder = defaultName + counter.ToString();
+            }
+
+            try
+            {
+                // Create folders
+                foreach (string folder in rootFolders)
+                {
+                    string finalPath = Path.Combine(_rootFolder, newProjectFolder, folder);
+
+                    if (!Directory.Exists(finalPath))
+                        Directory.CreateDirectory(finalPath);
+                }
+
+                // Create subfolders
+                foreach (string folder in contentFolders)
+                {
+                    string finalPath = Path.Combine(_rootFolder, newProjectFolder, "content/", folder);
+
+                    if (!Directory.Exists(finalPath))
+                        Directory.CreateDirectory(finalPath);
+                }
+
+                Log.Info("Created folders.");
+            }
+            catch (Exception exc)
+            {
+                Log.Exception(exc.ToString(), "Exception while creating folders.");
+            }
+            
+            try
+            {
+                // index.html
+                string indexFilePath = Path.Combine(_rootFolder, newProjectFolder, "index.html");
+                if (!File.Exists(indexFilePath))
+                {
+                    File.WriteAllText(indexFilePath, DefaultFiles.indexHTML);
+                }
+
+                // master_main.html
+                string masterFilePath = Path.Combine(_rootFolder, newProjectFolder, "master", "master_main.html");
+                if (!File.Exists(masterFilePath))
+                {
+                    File.WriteAllText(masterFilePath, DefaultFiles.masterHTML);
+                }
+            }
+            catch (Exception exc)
+            {
+                Log.Exception(exc.ToString(), "Exception while creating HTML files.");
+            }
+
+            Console.WriteLine($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
+            Console.WriteLine("Creation complete!");
         }
 
         /// <summary>
@@ -106,17 +180,25 @@ namespace Nitch
             if (fileBuffer.Trim().Length == 0)
                 return string.Empty;
 
-            // TODO: Scan for {{include:}} token
+            // Scan for {{include:}} token
             Tokenizer tokenizer = new Tokenizer(fileBuffer);
-            tokenizer.Process();
-
-            var list = tokenizer.GetTokenList();
-
+            tokenizer.Process("{{include:");
+            List<Token> tokensInclude = tokenizer.GetTokenList();
+            
             // TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values
+            foreach (Token token in tokensInclude)
+            {
+                string localPath = token.Value.Substring(1, token.Value.Length - 1);
+                var finalPath = Path.Combine(_rootFolder, localPath);
+
+                fileBuffer = File.ReadAllText(finalPath);
+            }
 
             // TODO: Scan for {{file:}} tokens, process each (as absolute or relative, to sourceFile)
 
             return string.Empty;
         }
+
+
     }
 }
