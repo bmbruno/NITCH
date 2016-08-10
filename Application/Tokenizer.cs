@@ -35,7 +35,7 @@ namespace Nitch
         /// <summary>
         /// Parse the file contents for tokens of the given type and populates the internal token list.
         /// </summary>
-        public void Process(string token)
+        public void ProcessToken(string token)
         {
             if (_tokens != null && _tokens.Count > 0)
             {

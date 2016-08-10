@@ -155,21 +155,19 @@ namespace Nitch
         /// <returns>List of filepaths.</returns>
         private List<string> LoadSourceFiles(string rootPath)
         {
-            List<string> files = new List<string>();
+            List<string> soureFiles = new List<string>();
+            string[] allFiles = Directory.GetFiles(rootPath, "*.html", SearchOption.AllDirectories);
 
-            DirectoryInfo dirInfo = new DirectoryInfo(rootPath);
-
-            foreach (var folder in dirInfo.GetDirectories())
+            // remove "master_" HTML files from the list
+            foreach (string file in allFiles)
             {
-                files.AddRange(LoadSourceFiles(folder.FullName)); // Recurse into subdirectories
+                string fileName = Path.GetFileName(file);
+
+                if (!fileName.StartsWith("master_", StringComparison.OrdinalIgnoreCase))
+                    soureFiles.Add(file);
             }
 
-            foreach (var file in dirInfo.GetFiles("*.html"))
-            {
-                files.Add(file.FullName);
-            }
-
-            return files;
+            return soureFiles;
         }
 
         private string ProcessFile(string file, string sourceFile)
@@ -182,7 +180,7 @@ namespace Nitch
 
             // Scan for {{include:}} token
             Tokenizer tokenizer = new Tokenizer(fileBuffer);
-            tokenizer.Process("{{include:");
+            tokenizer.ProcessToken("{{include:");
             List<Token> tokensInclude = tokenizer.GetTokenList();
             
             // TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values

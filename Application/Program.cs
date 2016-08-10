@@ -28,44 +28,56 @@ namespace Nitch
             //
 
             Parser parser = new Parser(args);
-            
-            if (parser.HasParam("create"))
-            {
-                if (String.IsNullOrEmpty(parser.GetParam("create")))
-                {
-                    // Run default project file/folder creation
-                    Nitchify builder = new Nitchify(appPath);
-                    builder.Create();
-                }
-                else
-                {
-                    // Run project file/folder creation at the given path
-                    Nitchify builder = new Nitchify(parser.GetParam("create"));
-                    builder.Create();
-                }
-            }
 
-            if (parser.HasParam("build"))
+            if (parser.Parameters.Count == 0)
             {
-                if (String.IsNullOrEmpty(parser.GetParam("build")))
+                // TODO: No parameters - show help
+                Console.Write("\n");
+                Console.WriteLine("HELP TEXT COMING SOON");
+                Console.Write("\n");
+            }
+            else
+            {
+                // Attempt to run program
+                
+                if (parser.HasParam("create"))
                 {
-                    // Run default build in the current folder
-                    Nitchify builder = new Nitchify(appPath, Infrastructure.Enumerations.PathingMode.Absolute);
-                    // builder.Build(); // TODO: uncomment this line
-                }
-                else
-                {
-                    // TODO: Run build in specified folder
-                    string startPath = parser.GetParam("build");
-                    if (System.IO.Directory.Exists(startPath))
+                    if (String.IsNullOrEmpty(parser.GetParam("create")))
                     {
-                        Nitchify builder = new Nitchify(startPath, Infrastructure.Enumerations.PathingMode.Absolute);
+                        // Run default project file/folder creation
+                        Nitchify builder = new Nitchify(appPath);
+                        builder.Create();
+                    }
+                    else
+                    {
+                        // Run project file/folder creation at the given path
+                        Nitchify builder = new Nitchify(parser.GetParam("create"));
+                        builder.Create();
+                    }
+                }
+
+                if (parser.HasParam("build"))
+                {
+                    if (String.IsNullOrEmpty(parser.GetParam("build")))
+                    {
+                        // Run default build in the current folder
+                        Nitchify builder = new Nitchify(appPath, Infrastructure.Enumerations.PathingMode.Absolute);
                         builder.Build();
                     }
                     else
                     {
-                        Console.WriteLine($"ERROR: Path not found: {startPath}");
-                        return;
+                        // TODO: Run build in specified folder
+                        string startPath = parser.GetParam("build");
+                        if (System.IO.Directory.Exists(startPath))
+                        {
+                            Nitchify builder = new Nitchify(startPath, Infrastructure.Enumerations.PathingMode.Absolute);
+                            builder.Build();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"ERROR: Path not found: {startPath}");
+                            return;
+                        }
                     }
                 }
             }
