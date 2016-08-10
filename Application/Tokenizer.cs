@@ -13,7 +13,7 @@ namespace Nitch
     {
         #region Members
 
-        private List<Token> _tokens { get; set; }
+        public List<Token> Tokens { get; set; }
 
         private string _fileContents { get; set; }
 
@@ -27,7 +27,7 @@ namespace Nitch
                 throw new Exception("'content' is an empty string. This is not allowed.");
 
             _fileContents = content;
-            _tokens = new List<Token>();
+            this.Tokens = new List<Token>();
         }
 
         #endregion
@@ -37,7 +37,7 @@ namespace Nitch
         /// </summary>
         public void ProcessToken(string token)
         {
-            if (_tokens != null && _tokens.Count > 0)
+            if (this.Tokens != null && this.Tokens.Count > 0)
             {
                 Reset();
             }
@@ -64,7 +64,7 @@ namespace Nitch
                             PositionInFile = startPos
                         };
 
-                        _tokens.Add(newToken);
+                        this.Tokens.Add(newToken);
                     }
                     else
                     {
@@ -78,18 +78,9 @@ namespace Nitch
             }
         }
 
-        /// <summary>
-        /// Gets the full list of tokens.
-        /// </summary>
-        /// <returns>List of Token objects.</returns>
-        public List<Token> GetTokenList()
-        {
-            return _tokens;
-        }
-
         private void Reset()
         {
-            _tokens = new List<Token>();
+            this.Tokens = new List<Token>();
         }
 
         /// <summary>

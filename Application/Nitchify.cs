@@ -14,7 +14,7 @@ namespace Nitch
     /// <summary>
     /// Builder class that handles the compilation of static HTML files.
     /// </summary>
-    class Nitchify
+    public class Nitchify
     {
         private const string _OUTPUT_DIR_NAME = "_nitch";
 
@@ -67,7 +67,7 @@ namespace Nitch
             foreach (string file in htmlFiles)
             {
                 Log.Info($"Building file: {file}");
-                string rawFileOutput = ProcessFile(file, file);
+                string rawFileOutput = ProcessFile(file);
             }
 
             Console.Write("\n");
@@ -172,33 +172,69 @@ namespace Nitch
             return soureFiles;
         }
 
-        private string ProcessFile(string file, string sourceFile)
+        /// <summary>
+        /// Processes a Nitch HTML file into
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        private string ProcessFile(string filePath)
         {
+            // Set up final output buffer and pathing tracking
+            StringBuilder fileOutput = new StringBuilder();
+            int fileDepth = CalculateFileDepth(filePath);
+
             // Open 'file', read into buffer; empty files should not be processed
-            string fileBuffer = File.ReadAllText(file);
+            string fileBuffer = File.ReadAllText(filePath);
 
             if (fileBuffer.Trim().Length == 0)
                 return string.Empty;
 
-            // Scan for {{include:}} token
+            fileOutput.Append(fileBuffer);
+
+            // Scan for {{master:}} token; master file and its child page are merged first
             Tokenizer tokenizer = new Tokenizer(fileBuffer);
-            tokenizer.ProcessToken("{{include:");
-            List<Token> tokensInclude = tokenizer.GetTokenList();
+            tokenizer.ProcessToken("{{master:}}");
+
+            // TODO: If found, process master file ({{file:}} tokens)
+
+
+            // TODO: Process {{file:}} tokens
+
+
+
+
+            //Tokenizer tokenizer = new Tokenizer(fileBuffer);
+            //tokenizer.ProcessToken("{{include:");
+            //List<Token> tokensInclude = tokenizer.GetTokenList();
             
-            // TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values
-            foreach (Token token in tokensInclude)
-            {
-                string localPath = token.Value.Substring(1, token.Value.Length - 1);
-                var finalPath = Path.Combine(_rootFolder, localPath);
+            //// TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values
+            //foreach (Token token in tokensInclude)
+            //{
+            //    string localPath = token.Value.Substring(1, token.Value.Length - 1);
+            //    var finalPath = Path.Combine(_rootFolder, localPath);
 
-                fileBuffer = File.ReadAllText(finalPath);
-            }
-
-            // TODO: Scan for {{file:}} tokens, process each (as absolute or relative, to sourceFile)
+            //    fileBuffer = File.ReadAllText(finalPath);
+            //}
 
             return string.Empty;
         }
 
+        /// <summary>
+        /// Gets the depth of the file or folder represented by the file path.
+        /// </summary>
+        /// <param name="filePath">Full absolute path of the file.</param>
+        /// <returns>Depth of the file or folder in whole integer.</returns>
+        private int CalculateFileDepth(string filePath)
+        {
+            if (String.IsNullOrEmpty(filePath))
+                throw new ArgumentNullException("filePath");
 
+            if (filePath.Contains("\\"))
+                return (filePath.Split('\\').Length);
+            else
+                return (filePath.Split('/').Length);
+
+        }
+        
     }
 }
