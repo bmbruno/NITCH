@@ -191,26 +191,29 @@ namespace Nitch
             StringBuilder fileOutput = new StringBuilder();
             int fileDepth = CalculateFileDepth(filePath);
 
-            // Open 'file', read into buffer; empty files should not be processed
+            // Open 'filePath', read into buffer; empty files should not be processed
             string fileBuffer = File.ReadAllText(filePath);
 
             if (fileBuffer.Trim().Length == 0)
                 return string.Empty;
 
-            // Scan for {{master:}} token; master file and its child page are merged first
+            // Scan for {{master:}} token; master file and its child page will need to be merged
             Tokenizer tokensForMaster = new Tokenizer(fileBuffer);
             tokensForMaster.ProcessToken("{{master:}}");
 
-            // TODO: If found, load master file contents into buffer, find {{placeholder:}} token, and combine two files (replacement of {{placeholder:}} token with child page content)
+            // TODO: If {{master:}} token is found, load master file contents into buffer, find {{placeholder:}} token, and combine two files (replacement of {{placeholder:}} token with child page content)
             if (tokensForMaster.Tokens.Count > 1)
                 throw new Exception($"Only one {{{{master:}}}} token can be defined per file. Multiple found in fine: {filePath}");
 
             if (tokensForMaster.Tokens.Count == 1)
             {
-                fileOutput.Append(CombineMasterWithChild(fileBuffer, tokensForMaster.Tokens.First().Value));
+                fileOutput.Append(CombineMasterWithChild(fileBuffer, tokensForMaster.Tokens.[0].Value));
+
+                // Remove {{master:}} token from child page
+                fileOutput.Replace(tokensForMaster.Tokens[0].RawValue, string.Empty);
             }
 
-            // TODO: Remove {{master:}} token from child page
+
 
 
 
@@ -241,7 +244,13 @@ namespace Nitch
 
         }
 
-        private string CombineMasterWithChild(string childPage, string pathToMaster)
+        /// <summary>
+        /// Combines child page content into master page content via placeholder tokens.
+        /// </summary>
+        /// <param name="childPage">File contents (HTML) of child page.</param>
+        /// <param name="pathToMaster">Path to the master page that was defined on the given child page.</param>
+        /// <returns>File contents of combined pages. {{placeholder:}} token is removed from master page.</returns>
+        private string CombineMasterWithChild(string childPageContent, string pathToMaster)
         {
             string masterFilePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(pathToMaster));
 
@@ -251,13 +260,13 @@ namespace Nitch
             string masterContents = File.ReadAllText(masterFilePath);
 
             // Get {{placeholder:}} token in master file and replace it with the childPage contents
-            Tokenizer masterTokens = new Tokenizer(masterContents);
-            masterTokens.ProcessToken("{{placeholder:}}");
+            Tokenizer placeholderTokens = new Tokenizer(masterContents);
+            placeholderTokens.ProcessToken("{{placeholder:}}");
 
-            if (masterTokens.Tokens.Count == 0)
+            if (placeholderTokens.Tokens.Count == 0)
                 throw new Exception($"No {{{{placeholder:}}}} token found in master file: {pathToMaster}");
 
-            return masterContents.Replace(masterTokens.Tokens[0].RawValue, childPage);
+            return masterContents.Replace(placeholderTokens.Tokens[0].RawValue, childPageContent);
         }
 
     }
