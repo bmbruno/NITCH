@@ -21,12 +21,16 @@ namespace Nitch
 
         #region Constructors
 
-        public Tokenizer(string content)
+        /// <summary>
+        /// Initializes the Token scanner.
+        /// </summary>
+        /// <param name="fileContent">Contents of the file to be scanned. Usually NOT a 'master' page.</param>
+        public Tokenizer(string fileContent)
         {
-            if (String.IsNullOrEmpty(content))
-                throw new Exception("'content' is an empty string. This is not allowed.");
+            if (String.IsNullOrEmpty(fileContent))
+                throw new ArgumentNullException("fileContent");
 
-            _fileContents = content;
+            _fileContents = fileContent;
             this.Tokens = new List<Token>();
         }
 
@@ -38,10 +42,8 @@ namespace Nitch
         public void ProcessToken(string token)
         {
             if (this.Tokens != null && this.Tokens.Count > 0)
-            {
                 Reset();
-            }
-
+            
             // If last two characters of token are }}, remove them for the search
             if (token.EndsWith("}}"))
                 token = token.Remove(token.IndexOf("}}"), 2);
@@ -82,6 +84,9 @@ namespace Nitch
             }
         }
 
+        /// <summary>
+        /// Cleans up any 
+        /// </summary>
         private void Reset()
         {
             this.Tokens = new List<Token>();
@@ -115,8 +120,8 @@ namespace Nitch
         {
             try
             {
-                int startPos = rawToken.IndexOf(value: ":", startIndex: 0) + 2;
-                int lengthToCut = rawToken.IndexOf("\"}}") - startPos;
+                int startPos = rawToken.IndexOf(value: ":", startIndex: 0) + 1;
+                int lengthToCut = rawToken.IndexOf("}}") - startPos;
 
                 return rawToken.Substring(startPos, lengthToCut);
             }

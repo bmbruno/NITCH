@@ -188,8 +188,7 @@ namespace Nitch
         private string ProcessFile(string filePath)
         {
             // Set up final output buffer and pathing tracking
-            StringBuilder fileOutput = new StringBuilder();
-            int fileDepth = CalculateFileDepth(filePath);
+            string fileOutput = string.Empty;
 
             // Open 'filePath', read into buffer; empty files should not be processed
             string fileBuffer = File.ReadAllText(filePath);
@@ -201,29 +200,34 @@ namespace Nitch
             Tokenizer tokensForMaster = new Tokenizer(fileBuffer);
             tokensForMaster.ProcessToken("{{master:}}");
 
-            // TODO: If {{master:}} token is found, load master file contents into buffer, find {{placeholder:}} token, and combine two files (replacement of {{placeholder:}} token with child page content)
+            // If {{master:}} token is found, load master file contents into buffer, find {{placeholder:}} token, and combine two files (replacement of {{placeholder:}} token with child page content)
             if (tokensForMaster.Tokens.Count > 1)
-                throw new Exception($"Only one {{{{master:}}}} token can be defined per file. Multiple found in fine: {filePath}");
+                throw new Exception("Only one {{master:}} token can be defined per file.");
 
             if (tokensForMaster.Tokens.Count == 1)
             {
-                fileOutput.Append(CombineMasterWithChild(fileBuffer, tokensForMaster.Tokens.[0].Value));
+                fileOutput = CombineMasterWithChild(fileBuffer, tokensForMaster.Tokens[0].Value);
 
                 // Remove {{master:}} token from child page
                 fileOutput.Replace(tokensForMaster.Tokens[0].RawValue, string.Empty);
             }
+            
+            // Process {{file:}} tokens in new file (respect absolute/relative pathing option)
+            Tokenizer tokensForFiles = new Tokenizer(fileOutput);
+            tokensForFiles.ProcessToken("{{file:}}");
 
-
-
-
-
-            // TODO: Process {{file:}} tokens
-
-
-
-
-
-
+            foreach (Token fileToken in tokensForFiles.Tokens)
+            {
+                try
+                {
+                    ProcessFileToken(fileToken, filePath, fileOutput);
+                }
+                catch (Exception exc)
+                {
+                    Log.Exception(exc.Message.ToString(), $"Error compiling {{{{file:}}}} token at position {fileToken.PositionInFile.ToString()}.");
+                }
+            }
+            
             return string.Empty;
         }
 
@@ -234,14 +238,39 @@ namespace Nitch
         /// <returns>Depth of the file or folder in whole integer.</returns>
         private int CalculateFileDepth(string filePath)
         {
+            if (!filePath.Contains("/") && !filePath.Contains(@"\"))
+                return 0;
+
             if (String.IsNullOrEmpty(filePath))
                 throw new ArgumentNullException("filePath");
 
-            if (filePath.Contains("\\"))
-                return (filePath.Split('\\').Length);
-            else
-                return (filePath.Split('/').Length);
+            filePath = filePath.Replace(@"\", "/").Replace("//", string.Empty);
+            
+            return filePath.Split('/').Length;
+        }
 
+        /// <summary>
+        /// Creates a relative file path to the target file based on the location of the current file.
+        /// </summary>
+        /// <param name="currentFilePath">Absolute path of the source file from the root of the website.</param>
+        /// <param name="targetFilePath">Absolute path of the target file from the root of the website.</param>
+        /// <returns>Complete relative path.</returns>
+        private string GetRelativeFilePath(string currentFilePath, string targetFilePath)
+        {
+            int fileDepth = CalculateFileDepth(currentFilePath);
+            string finalPath = string.Empty;
+
+            for (int i = 1; i <= fileDepth; i++)
+            {
+                finalPath += "../";
+            }
+
+            if (targetFilePath.StartsWith("/"))
+                targetFilePath = targetFilePath.Remove(0, 1);
+
+            finalPath += targetFilePath;
+
+            return finalPath;
         }
 
         /// <summary>
@@ -269,5 +298,37 @@ namespace Nitch
             return masterContents.Replace(placeholderTokens.Tokens[0].RawValue, childPageContent);
         }
 
+        private void ProcessFileToken(Token fileToken, string currentFilePath, string fileContents)
+        {
+            currentFilePath = currentFilePath.Replace(_rootFolder, string.Empty).Remove(0, 1);
+
+            // Verify file exists at given location in the token
+            string filePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(fileToken.Value));
+            
+            if (File.Exists(filePath))
+            {
+                // If yes (file found), then output its path (relative/absolute)
+                if (this.Pathing == PathingMode.Absolute)
+                {
+                    // All paths in source are required to be absolute from the website root, so just swap the token for that value
+                    fileContents = fileContents.Replace(fileToken.RawValue, fileToken.Value);
+                }
+                else if (this.Pathing == PathingMode.Relative)
+                {
+                    // Swap with a relative path
+                    string relativePath = GetRelativeFilePath(currentFilePath, fileToken.Value);
+                    fileContents = fileContents.Replace(fileToken.RawValue, relativePath);
+                }
+                else
+                {
+                    throw new Exception("Nitchify 'Pathing' is null. Pathing type cannot be determined.");
+                }
+            }
+            else
+            {
+                // If no file found, throw warning but do not error - this will let devs catch incorrect file references
+                Log.Warning($"File not found for token {fileToken.RawValue} at position {fileToken.PositionInFile.ToString()}");
+            }
+        }
     }
 }
