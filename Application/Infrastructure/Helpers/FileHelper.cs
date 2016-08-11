@@ -17,5 +17,18 @@ namespace Nitch.Infrastructure.Helpers
             string appLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
             return System.IO.Path.GetDirectoryName(appLocation);
         }
+
+        /// <summary>
+        /// If found, removes a leading slash from a path. This allows it to be combined properly when using System.IO.Path.Combine.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public static string FormatForPathCombining(string filePath)
+        {
+            if (filePath.StartsWith("/") || filePath.StartsWith(@"\"))
+                return filePath.Remove(0, 1);
+
+            return filePath;
+        }
     }
 }

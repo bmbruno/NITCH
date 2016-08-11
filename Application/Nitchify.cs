@@ -67,7 +67,15 @@ namespace Nitch
             foreach (string file in htmlFiles)
             {
                 Log.Info($"Building file: {file}");
-                string rawFileOutput = ProcessFile(file);
+
+                try
+                {
+                    string rawFileOutput = ProcessFile(file);
+                }
+                catch (Exception exc)
+                {
+                    Log.Exception(exc.Message.ToString(), "Error building file!");
+                }
             }
 
             Console.Write("\n");
@@ -189,13 +197,21 @@ namespace Nitch
             if (fileBuffer.Trim().Length == 0)
                 return string.Empty;
 
-            fileOutput.Append(fileBuffer);
-
             // Scan for {{master:}} token; master file and its child page are merged first
-            Tokenizer tokenizer = new Tokenizer(fileBuffer);
-            tokenizer.ProcessToken("{{master:}}");
+            Tokenizer tokensForMaster = new Tokenizer(fileBuffer);
+            tokensForMaster.ProcessToken("{{master:}}");
 
-            // TODO: If found, process master file ({{file:}} tokens)
+            // TODO: If found, load master file contents into buffer, find {{placeholder:}} token, and combine two files (replacement of {{placeholder:}} token with child page content)
+            if (tokensForMaster.Tokens.Count > 1)
+                throw new Exception($"Only one {{{{master:}}}} token can be defined per file. Multiple found in fine: {filePath}");
+
+            if (tokensForMaster.Tokens.Count == 1)
+            {
+                fileOutput.Append(CombineMasterWithChild(fileBuffer, tokensForMaster.Tokens.First().Value));
+            }
+
+            // TODO: Remove {{master:}} token from child page
+
 
 
             // TODO: Process {{file:}} tokens
@@ -203,18 +219,7 @@ namespace Nitch
 
 
 
-            //Tokenizer tokenizer = new Tokenizer(fileBuffer);
-            //tokenizer.ProcessToken("{{include:");
-            //List<Token> tokensInclude = tokenizer.GetTokenList();
-            
-            //// TODO: For each {{include:}} token, recurse but respect the sourceFile for pathing values
-            //foreach (Token token in tokensInclude)
-            //{
-            //    string localPath = token.Value.Substring(1, token.Value.Length - 1);
-            //    var finalPath = Path.Combine(_rootFolder, localPath);
 
-            //    fileBuffer = File.ReadAllText(finalPath);
-            //}
 
             return string.Empty;
         }
@@ -235,6 +240,25 @@ namespace Nitch
                 return (filePath.Split('/').Length);
 
         }
-        
+
+        private string CombineMasterWithChild(string childPage, string pathToMaster)
+        {
+            string masterFilePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(pathToMaster));
+
+            if (!File.Exists(masterFilePath))
+                throw new FileNotFoundException($"No master file found at {pathToMaster}");
+
+            string masterContents = File.ReadAllText(masterFilePath);
+
+            // Get {{placeholder:}} token in master file and replace it with the childPage contents
+            Tokenizer masterTokens = new Tokenizer(masterContents);
+            masterTokens.ProcessToken("{{placeholder:}}");
+
+            if (masterTokens.Tokens.Count == 0)
+                throw new Exception($"No {{{{placeholder:}}}} token found in master file: {pathToMaster}");
+
+            return masterContents.Replace(masterTokens.Tokens[0].RawValue, childPage);
+        }
+
     }
 }

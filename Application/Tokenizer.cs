@@ -42,6 +42,10 @@ namespace Nitch
                 Reset();
             }
 
+            // If last two characters of token are }}, remove them for the search
+            if (token.EndsWith("}}"))
+                token = token.Remove(token.IndexOf("}}"), 2);
+
             IEnumerable<int> allTokenIndexes = _fileContents.AllIndexesOf(token);
 
             foreach (int startPos in allTokenIndexes)
