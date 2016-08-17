@@ -87,17 +87,29 @@ namespace Nitch
                 }
                 catch (Exception exc)
                 {
-                    Log.Exception(exc.Message.ToString(), "Error building file!");
+                    Log.Exception(exc.Message, "Error building file.");
                 }
             }
 
             // Step 2: Copy all non-HTML and non-master files to new output directory (respecting folder structure)
-            CopyBaseFilesToOutputFolder(_rootFolder, _OUTPUT_DIR_NAME);
+            try
+            {
+                CopyBaseFilesToOutputFolder(_rootFolder, _OUTPUT_DIR_NAME);
+            }
+            catch (Exception exc)
+            {
+                Log.Exception(exc.Message, "Error setting up output directory.");
+            }
 
+            // Step 3: Write output HTML files to their proper locations
+            try
+            {
 
-
-
-            // Step 4: Write output HTML files to their proper locations
+            }
+            catch (Exception exc)
+            {
+                Log.Exception(exc.Message, "Error writing output files.");
+            }
 
 
 
@@ -198,13 +210,13 @@ namespace Nitch
         }
 
         /// <summary>
-        /// Processes a Nitch HTML file into
+        /// Processes a Nitch HTML file into a temporary buffer of final output. Combines and refrenced master files
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
+        /// <param name="filePath">Path to the file that should be compiled.</param>
+        /// <returns>Output of compiled file.</returns>
         private string ProcessFile(string filePath)
         {
-            // Set up final output buffer and pathing tracking
+            // Set up final output buffer
             string fileOutput = string.Empty;
 
             // Open 'filePath', read into buffer; empty files should not be processed

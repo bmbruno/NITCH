@@ -38,9 +38,9 @@ namespace Nitch.Infrastructure.Helpers
         /// </summary>
         /// <param name="source">Source directory.</param>
         /// <param name="target">Target directory location.</param>
+        /// <param name="masterName">Pattern of master filenames.</param>
         /// <param name="ignoreFolder">Folder to ignore when copying.</param>
-        /// <param name="masterName"></param>
-        public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string ignoreFolder = null, string masterFilePattern = null)
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string masterFilePattern, string ignoreFolder = null)
         {
             Directory.CreateDirectory(target.FullName);
 
@@ -55,7 +55,7 @@ namespace Nitch.Infrastructure.Helpers
             foreach (DirectoryInfo diSourceSubDir in source.GetDirectories().Where(u => u.Name != ignoreFolder))
             {
                 DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
-                CopyAll(diSourceSubDir, nextTargetSubDir);
+                CopyAll(diSourceSubDir, nextTargetSubDir, masterFilePattern, ignoreFolder);
             }
         }
 
