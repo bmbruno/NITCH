@@ -59,7 +59,7 @@ namespace Nitch.Infrastructure.Helpers
             }
         }
 
-        public static string[] RemoveMasterFilesFromList(string[] allFiles)
+        public static string[] RemoveMasterFilesFromList(string[] allFiles, string masterFilePattern)
         {
             List<string> sourceFiles = new List<string>();
 
@@ -67,7 +67,7 @@ namespace Nitch.Infrastructure.Helpers
             {
                 string fileName = Path.GetFileName(file);
 
-                if (!fileName.StartsWith("master_", StringComparison.OrdinalIgnoreCase))
+                if (!fileName.StartsWith(masterFilePattern, StringComparison.OrdinalIgnoreCase))
                     sourceFiles.Add(file);
             }
 

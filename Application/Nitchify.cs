@@ -65,12 +65,12 @@ namespace Nitch
         {
             Log.Info("Starting website build...");
 
-            Console.WriteLine($"Root Folder: {_rootFolder}");
-            Console.WriteLine($"File pathing: {Pathing.ToString()}");
+            Log.Info($"Root Folder: {_rootFolder}");
+            Log.Info($"File pathing: {Pathing.ToString()}");
             Console.Write("\n");
 
             // Load all HTML files in and under root directory
-            List<string> htmlFiles = LoadSourceFiles(_rootFolder);
+            List<string> htmlFiles = LoadSourceFiles(_rootFolder, _OUTPUT_DIR_NAME);
             List<OutputFile> outputFiles = new List<OutputFile>();
 
             // Step 1: Combine each file with master, process tokens, get output for each file
@@ -110,10 +110,9 @@ namespace Nitch
             {
                 Log.Exception(exc.Message, "Error writing output files.");
             }
-
-
-
+            
             Console.Write("\n");
+            Log.Info($"Files built: {outputFiles.Count}");
             Log.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
             Log.Info("Build complete!");
         }
@@ -198,15 +197,17 @@ namespace Nitch
         /// </summary>
         /// <param name="rootPath">Starting folder path.</param>
         /// <returns>List of filepaths.</returns>
-        private List<string> LoadSourceFiles(string rootPath)
+        private List<string> LoadSourceFiles(string rootPath, string ignoreFolder)
         {
-            List<string> sourceFiles = new List<string>();
             string[] allFiles = Directory.GetFiles(rootPath, "*.html", SearchOption.AllDirectories);
 
-            // Remove "master_" HTML files from the list so they aren't processed for {{master:}} tokens
-            allFiles = FileHelper.RemoveMasterFilesFromList(allFiles);
+            // In case a nitch output folder arleady exists, ignore it
+            allFiles = allFiles.Where(u => !u.Contains(ignoreFolder)).ToArray();
 
-            return sourceFiles;
+            // Remove "master_" HTML files from the list so they aren't processed for {{master:}} tokens
+            allFiles = FileHelper.RemoveMasterFilesFromList(allFiles, _MASTER_FILE_TEMPLATE);
+
+            return allFiles.ToList();
         }
 
         /// <summary>
@@ -381,7 +382,7 @@ namespace Nitch
             DirectoryInfo sourceInfo = new DirectoryInfo(_rootFolder);
             DirectoryInfo destinationInfo = new DirectoryInfo(Path.Combine(FileHelper.FormatForPathCombining(_rootFolder), FileHelper.FormatForPathCombining(_OUTPUT_DIR_NAME)));
 
-            FileHelper.CopyAll(sourceInfo, destinationInfo, _OUTPUT_DIR_NAME, _MASTER_FILE_TEMPLATE);
+            FileHelper.CopyAll(sourceInfo, destinationInfo, _MASTER_FILE_TEMPLATE, _OUTPUT_DIR_NAME);
         }
 
         ///// <summary>
