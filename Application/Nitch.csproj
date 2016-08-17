@@ -53,6 +53,7 @@
     <Compile Include="Infrastructure\Helpers\FileHelper.cs" />
     <Compile Include="Infrastructure\Helpers\StringExtensions.cs" />
     <Compile Include="Infrastructure\Log.cs" />
+    <Compile Include="Models\OutputFile.cs" />
     <Compile Include="Models\Token.cs" />
     <Compile Include="Nitchify.cs" />
     <Compile Include="Program.cs" />

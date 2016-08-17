@@ -16,7 +16,15 @@ namespace Nitch
     /// </summary>
     public class Nitchify
     {
+        /// <summary>
+        /// Default output directory for compiled files.
+        /// </summary>
         private const string _OUTPUT_DIR_NAME = "_nitch";
+
+        /// <summary>
+        /// Default pattern for identifying 'master' files.
+        /// </summary>
+        private const string _MASTER_FILE_TEMPLATE = "master_";
 
         #region Members
 
@@ -63,20 +71,35 @@ namespace Nitch
 
             // Load all HTML files in and under root directory
             List<string> htmlFiles = LoadSourceFiles(_rootFolder);
+            List<OutputFile> outputFiles = new List<OutputFile>();
 
+            // Step 1: Combine each file with master, process tokens, get output for each file
             foreach (string file in htmlFiles)
             {
                 Log.Info($"Building file: {file}");
+                OutputFile oFile = new OutputFile();
+                oFile.FilePath = file;
 
                 try
                 {
-                    string rawFileOutput = ProcessFile(file);
+                    oFile.HTML = ProcessFile(file);
+                    outputFiles.Add(oFile);
                 }
                 catch (Exception exc)
                 {
                     Log.Exception(exc.Message.ToString(), "Error building file!");
                 }
             }
+
+            // Step 2: Copy all non-HTML and non-master files to new output directory (respecting folder structure)
+            CopyBaseFilesToOutputFolder(_rootFolder, _OUTPUT_DIR_NAME);
+
+
+
+
+            // Step 4: Write output HTML files to their proper locations
+
+
 
             Console.Write("\n");
             Log.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
@@ -165,19 +188,13 @@ namespace Nitch
         /// <returns>List of filepaths.</returns>
         private List<string> LoadSourceFiles(string rootPath)
         {
-            List<string> soureFiles = new List<string>();
+            List<string> sourceFiles = new List<string>();
             string[] allFiles = Directory.GetFiles(rootPath, "*.html", SearchOption.AllDirectories);
 
-            // remove "master_" HTML files from the list
-            foreach (string file in allFiles)
-            {
-                string fileName = Path.GetFileName(file);
+            // Remove "master_" HTML files from the list so they aren't processed for {{master:}} tokens
+            allFiles = FileHelper.RemoveMasterFilesFromList(allFiles);
 
-                if (!fileName.StartsWith("master_", StringComparison.OrdinalIgnoreCase))
-                    soureFiles.Add(file);
-            }
-
-            return soureFiles;
+            return sourceFiles;
         }
 
         /// <summary>
@@ -220,7 +237,7 @@ namespace Nitch
             {
                 try
                 {
-                    ProcessFileToken(fileToken, filePath, fileOutput);
+                    fileOutput = ProcessFileToken(fileToken, filePath, fileOutput);
                 }
                 catch (Exception exc)
                 {
@@ -228,7 +245,7 @@ namespace Nitch
                 }
             }
             
-            return string.Empty;
+            return fileOutput;
         }
 
         /// <summary>
@@ -298,7 +315,14 @@ namespace Nitch
             return masterContents.Replace(placeholderTokens.Tokens[0].RawValue, childPageContent);
         }
 
-        private void ProcessFileToken(Token fileToken, string currentFilePath, string fileContents)
+        /// <summary>
+        /// Parses and renders a {{file:}} token value into an absolute or relative path for the HTML output.
+        /// </summary>
+        /// <param name="fileToken">Token object for File type.</param>
+        /// <param name="currentFilePath">Path to the current file. Required for relative pathing options.</param>
+        /// <param name="fileContents">File output buffer.</param>
+        /// <returns>Output HTML with file token rendered to final HTML.</returns>
+        private string ProcessFileToken(Token fileToken, string currentFilePath, string fileContents)
         {
             currentFilePath = currentFilePath.Replace(_rootFolder, string.Empty).Remove(0, 1);
 
@@ -323,12 +347,39 @@ namespace Nitch
                 {
                     throw new Exception("Nitchify 'Pathing' is null. Pathing type cannot be determined.");
                 }
+
+                return fileContents;
             }
             else
             {
                 // If no file found, throw warning but do not error - this will let devs catch incorrect file references
                 Log.Warning($"File not found for token {fileToken.RawValue} at position {fileToken.PositionInFile.ToString()}");
             }
+
+            return string.Empty;
         }
+        
+        /// <summary>
+        /// Copies source files to output directory, excluding master files.
+        /// </summary>
+        /// <param name="rootPath">Starting folder path.</param>
+        /// <param name="targetPath">Destination directory.</param>
+        private void CopyBaseFilesToOutputFolder(string rootPath, string targetPath)
+        {
+            DirectoryInfo sourceInfo = new DirectoryInfo(_rootFolder);
+            DirectoryInfo destinationInfo = new DirectoryInfo(Path.Combine(FileHelper.FormatForPathCombining(_rootFolder), FileHelper.FormatForPathCombining(_OUTPUT_DIR_NAME)));
+
+            FileHelper.CopyAll(sourceInfo, destinationInfo, _OUTPUT_DIR_NAME, _MASTER_FILE_TEMPLATE);
+        }
+
+        ///// <summary>
+        ///// Creates the Nitch output directory on disk.
+        ///// </summary>
+        ///// <param name="rootPath">Nitch root path.</param>
+        ///// <param name="directoryName">Output directory name.</param>
+        //private void CreateOutputDirectory(string rootPath, string directoryName)
+        //{
+        //    Directory.CreateDirectory(Path.Combine(FileHelper.FormatForPathCombining(rootPath), FileHelper.FormatForPathCombining(directoryName)));
+        //}
     }
 }
