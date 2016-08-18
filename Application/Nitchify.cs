@@ -94,6 +94,11 @@ namespace Nitch
             // Step 2: Copy all non-HTML and non-master files to new output directory (respecting folder structure)
             try
             {
+                // Always clear existing output and start fresh
+                string outputDir = Path.Combine(_rootFolder, _OUTPUT_DIR_NAME);
+                if (Directory.Exists(outputDir))
+                    Directory.Delete(outputDir, true);
+
                 CopyBaseFilesToOutputFolder(_rootFolder, _OUTPUT_DIR_NAME);
             }
             catch (Exception exc)
@@ -102,8 +107,6 @@ namespace Nitch
             }
 
             // Step 3: Write output HTML files to their proper locations
-
-            // Get output path for each file
             foreach (OutputFile file in outputFiles)
             {
                 string outputPath = file.FilePath.Replace(_rootFolder, _OUTPUT_DIR_NAME);
@@ -247,7 +250,7 @@ namespace Nitch
                 fileOutput = CombineMasterWithChild(fileBuffer, tokensForMaster.Tokens[0].Value);
 
                 // Remove {{master:}} token from child page
-                fileOutput.Replace(tokensForMaster.Tokens[0].RawValue, string.Empty);
+                fileOutput = fileOutput.Replace(tokensForMaster.Tokens[0].RawValue, string.Empty);
             }
             
             // Process {{file:}} tokens in new file (respect absolute/relative pathing option)
