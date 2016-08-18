@@ -199,8 +199,8 @@ namespace Nitch
                 Log.Exception(exc.ToString(), "Exception while creating HTML files.");
             }
 
-            Console.WriteLine($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
-            Console.WriteLine("Creation complete!");
+            Log.Info($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
+            Log.Info("Creation complete!");
         }
 
         /// <summary>

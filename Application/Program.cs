@@ -10,14 +10,13 @@ namespace Nitch
 {
     /// <summary>
     /// NITCH - .NET Integrated Template Compiler for HTML
-    /// Probably going to call this "Niche" when all is said and done?
+    /// TODO: Probably going to call this "Niche" when all is said and done.
     /// </summary>
-    /// 
     class Program
     {
         static void Main(string[] args)
         {
-            string AppVersion = "0.50";
+            string AppVersion = "0.95";
             string appPath = FileHelper.GetCurrentApplicationDirectory();
 
             Console.WriteLine("NITCH (.NET Integrated Template Compiler for HTML)");
