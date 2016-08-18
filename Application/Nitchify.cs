@@ -102,15 +102,23 @@ namespace Nitch
             }
 
             // Step 3: Write output HTML files to their proper locations
-            try
-            {
 
-            }
-            catch (Exception exc)
+            // Get output path for each file
+            foreach (OutputFile file in outputFiles)
             {
-                Log.Exception(exc.Message, "Error writing output files.");
+                string outputPath = file.FilePath.Replace(_rootFolder, _OUTPUT_DIR_NAME);
+                outputPath = Path.Combine(_rootFolder, outputPath);
+
+                try
+                {
+                    File.WriteAllText(outputPath, file.HTML);
+                }
+                catch (Exception exc)
+                {
+                    Log.Exception(exc.Message, $"Error writing output file: {file.FilePath}");
+                }
             }
-            
+
             Console.Write("\n");
             Log.Info($"Files built: {outputFiles.Count}");
             Log.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
@@ -384,15 +392,5 @@ namespace Nitch
 
             FileHelper.CopyAll(sourceInfo, destinationInfo, _MASTER_FILE_TEMPLATE, _OUTPUT_DIR_NAME);
         }
-
-        ///// <summary>
-        ///// Creates the Nitch output directory on disk.
-        ///// </summary>
-        ///// <param name="rootPath">Nitch root path.</param>
-        ///// <param name="directoryName">Output directory name.</param>
-        //private void CreateOutputDirectory(string rootPath, string directoryName)
-        //{
-        //    Directory.CreateDirectory(Path.Combine(FileHelper.FormatForPathCombining(rootPath), FileHelper.FormatForPathCombining(directoryName)));
-        //}
     }
 }
