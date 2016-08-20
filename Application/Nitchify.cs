@@ -291,7 +291,7 @@ namespace Nitch
                         // Get the placeholder from master and insert the child content
                         var queryResult = placeholderTokens.Tokens.Where(u => u.Value == contentTokens.Tokens[i].Value);
 
-                        if (queryResult == null)
+                        if (queryResult.Count() == 0)
                             throw new Exception($"No placeholder found for {{{{content:{contentTokens.Tokens[i].Value}}}}} token.");
 
                         if (queryResult.Count() > 1)
@@ -299,17 +299,12 @@ namespace Nitch
 
                         Token placeholderToken = queryResult.First();
                         masterBuffer = masterBuffer.Replace(placeholderToken.RawValue, tokenContent);
-                            
-                        // Remove the {{content:}}, {{content:end}}, and all content from the child page
-                        int lengthToRemove = (lengthOfContent + contentTokens.Tokens[i + 1].RawValue.Length);
-                        childBuffer.Remove(contentTokens.Tokens[i].PositionInFile, lengthToRemove);
                     }
 
                 }
-               
 
-                // Remove {{master:}} token from child page
-                fileOutput = fileOutput.Replace(masterTokens.Tokens[0].RawValue, string.Empty);
+                // Output completed file for next step
+                fileOutput = masterBuffer;
             }
 
             //
@@ -460,7 +455,7 @@ namespace Nitch
         }
 
         /// <summary>
-        /// Validates that a token list represents a valid structure of tokens. Valid structure: Odd tokens are {{content:name}} and even tokens are {{content:end}}, where 'name' is an identifier.
+        /// Validates that a token list represents a valid structure of paired-tokens. Valid structure: Odd tokens are {{content:name}} and even tokens are {{content:end}}, where 'name' is an identifier.
         /// </summary>
         /// <param name="tokenList">List of Token objects to validate.</param>
         /// <returns>True if valid, false if invalid.</returns>
@@ -473,15 +468,12 @@ namespace Nitch
             if (tokenList.Count % 2 > 0)
                 isValid = false;
 
-            while (isValid)
+            while (isValid && (position < tokenList.Count - 1))
             {
-                if (position < tokenList.Count - 1)
-                {
-                    // Every other {{content:}} token should be an "end" token like {{content:end}}
-                    if (!tokenList[position + 1].RawValue.EndsWith(":end}}"))
-                        isValid = false;
-                }
-
+                // Every other {{content:}} token should be an "end" token like {{content:end}}
+                if (!tokenList[position + 1].RawValue.EndsWith(":end}}"))
+                    isValid = false;
+                
                 position += 2;
             }
 

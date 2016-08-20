@@ -82,6 +82,9 @@ namespace Nitch
                     }
                 }
             }
+
+            string input = Console.ReadLine();
+
         }
     }
 }

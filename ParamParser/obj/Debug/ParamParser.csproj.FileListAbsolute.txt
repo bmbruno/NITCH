@@ -2,3 +2,4 @@ D:\Projects\nitch\ParamParser\bin\Debug\ParamParser.dll
 D:\Projects\nitch\ParamParser\bin\Debug\ParamParser.pdb
 D:\Projects\nitch\ParamParser\obj\Debug\ParamParser.dll
 D:\Projects\nitch\ParamParser\obj\Debug\ParamParser.pdb
+D:\Projects\nitch\ParamParser\obj\Debug\ParamParser.csprojResolveAssemblyReference.cache
