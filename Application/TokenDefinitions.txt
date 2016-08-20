@@ -1,0 +1,24 @@
+Master
+	{{master:/location/of/file.html}}
+	
+	Defines what master file belongs to this child page.
+	Must appear as the first line of the file, before any markup.
+	Must be absolute path from the project root.
+
+File
+	{{file:/path/to/file.png}}
+
+	Defines a file path to a resource (CSS, JS, images, etc.).
+	Must be absolute path from the project root.
+
+Placeholder
+	{{placeholder:name}}
+
+	Defines a placeholder for content on a Master page.
+
+Content
+	{{content:name}} {{content:end}}
+	
+	Defines a region for content to be inserted into a Master page.
+	'name' must match a placeholder.
+	Cannot have nested {{content:}} tokens; only {{file:}} tokens are valid inside a content block

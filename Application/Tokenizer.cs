@@ -48,6 +48,8 @@ namespace Nitch
             if (token.EndsWith("}}"))
                 token = token.Remove(token.IndexOf("}}"), 2);
 
+            // TODO: PLACEHOLDER EXCEPTION
+
             IEnumerable<int> allTokenIndexes = _fileContents.AllIndexesOf(token);
 
             foreach (int startPos in allTokenIndexes)
