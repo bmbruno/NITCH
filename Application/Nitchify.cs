@@ -448,7 +448,7 @@ namespace Nitch
             else
             {
                 // If no file found, throw warning but do not error - this will let devs catch incorrect file references
-                this._logger.Warning($"File not found for token {fileToken.RawValue} in file '{currentFilePath}'.");
+                this._logger.Warning($"File not found for token {fileToken.RawValue}.");
             }
 
             return fileContents;
