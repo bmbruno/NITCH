@@ -247,64 +247,74 @@ namespace Nitch
             Tokenizer masterTokens = new Tokenizer(childBuffer);
             masterTokens.ProcessToken("{{master:}}");
 
-            if (masterTokens.Tokens.Count > 1)
-                throw new Exception("Only one {{master:}} token can be defined per file.");
-
-            string masterBuffer = string.Empty;
-
-            if (masterTokens.Tokens.Count == 1)
+            if (masterTokens.Tokens.Count > 0)
             {
-                // Load contents of master file
-                string masterFilePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(masterTokens.Tokens[0].Value));
 
-                if (!File.Exists(masterFilePath))
-                    throw new FileNotFoundException($"No master file found at {masterTokens.Tokens[0].Value}");
+                if (masterTokens.Tokens.Count > 1)
+                    throw new Exception("Only one {{master:}} token can be defined per file.");
 
-                masterBuffer = File.ReadAllText(masterFilePath);
+                string masterBuffer = string.Empty;
 
-                if (String.IsNullOrEmpty(masterBuffer))
-                    throw new Exception($"Master file cannot be empty. File: {masterFilePath}");
-
-                // Load {{placeholder:}} tokens from master file
-                Tokenizer placeholderTokens = new Tokenizer(masterBuffer);
-                placeholderTokens.ProcessToken("{{placeholder:}}");
-
-                // Scan child file for {{content:}} tokens; verify that all content tokens have an 'end' token
-                Tokenizer contentTokens = new Tokenizer(childBuffer);
-                contentTokens.ProcessToken("{{content:}}");
-
-                if (contentTokens.Tokens.Count > 1)
+                if (masterTokens.Tokens.Count == 1)
                 {
-                    // Verify structure of tokens (alternating start/end tokens)
-                    if (!IsValidContentTokenStructure(contentTokens.Tokens))
-                        throw new Exception("Invalid {{content:}} token structure in file. Coult not find closing {{content:end}} token.");
+                    // Load contents of master file
+                    string masterFilePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(masterTokens.Tokens[0].Value));
 
-                    for (int i = 0; i < contentTokens.Tokens.Count - 1; i += 2)
+                    if (!File.Exists(masterFilePath))
+                        throw new FileNotFoundException($"No master file found at {masterTokens.Tokens[0].Value}");
+
+                    masterBuffer = File.ReadAllText(masterFilePath);
+
+                    if (String.IsNullOrEmpty(masterBuffer))
+                        throw new Exception($"Master file cannot be empty. File: {masterFilePath}");
+
+                    // Load {{placeholder:}} tokens from master file
+                    Tokenizer placeholderTokens = new Tokenizer(masterBuffer);
+                    placeholderTokens.ProcessToken("{{placeholder:}}");
+
+                    // Scan child file for {{content:}} tokens; verify that all content tokens have an 'end' token
+                    Tokenizer contentTokens = new Tokenizer(childBuffer);
+                    contentTokens.ProcessToken("{{content:}}");
+
+                    if (contentTokens.Tokens.Count > 1)
                     {
-                        // Pull content from between the tokens
-                        int lengthOfContent = (contentTokens.Tokens[i + 1].PositionInFile - contentTokens.Tokens[i].PositionInFile);
-                        string tokenContent = childBuffer.Substring(contentTokens.Tokens[i].PositionInFile, lengthOfContent);
+                        // Verify structure of tokens (alternating start/end tokens)
+                        if (!IsValidContentTokenStructure(contentTokens.Tokens))
+                            throw new Exception("Invalid {{content:}} token structure in file. Coult not find closing {{content:end}} token.");
 
-                        // We don't want the raw token string in the copied content
-                        tokenContent = tokenContent.Replace(contentTokens.Tokens[i].RawValue, string.Empty);
+                        for (int i = 0; i < contentTokens.Tokens.Count - 1; i += 2)
+                        {
+                            // Pull content from between the tokens
+                            int lengthOfContent = (contentTokens.Tokens[i + 1].PositionInFile - contentTokens.Tokens[i].PositionInFile);
+                            string tokenContent = childBuffer.Substring(contentTokens.Tokens[i].PositionInFile, lengthOfContent);
 
-                        // Get the placeholder from master and insert the child content
-                        var queryResult = placeholderTokens.Tokens.Where(u => u.Value == contentTokens.Tokens[i].Value);
+                            // We don't want the raw token string in the copied content
+                            tokenContent = tokenContent.Replace(contentTokens.Tokens[i].RawValue, string.Empty);
 
-                        if (queryResult.Count() == 0)
-                            throw new Exception($"No placeholder found for {{{{content:{contentTokens.Tokens[i].Value}}}}} token.");
+                            // Get the placeholder from master and insert the child content
+                            var queryResult = placeholderTokens.Tokens.Where(u => u.Value == contentTokens.Tokens[i].Value);
 
-                        if (queryResult.Count() > 1)
-                            throw new Exception($"Cannot define multiple placeholders for the same {{{{content:{contentTokens.Tokens[i].Value}}}}} token.");
+                            if (queryResult.Count() == 0)
+                                throw new Exception($"No placeholder found for {{{{content:{contentTokens.Tokens[i].Value}}}}} token.");
 
-                        Token placeholderToken = queryResult.First();
-                        masterBuffer = masterBuffer.Replace(placeholderToken.RawValue, tokenContent);
+                            if (queryResult.Count() > 1)
+                                throw new Exception($"Cannot define multiple placeholders for the same {{{{content:{contentTokens.Tokens[i].Value}}}}} token.");
+
+                            Token placeholderToken = queryResult.First();
+                            masterBuffer = masterBuffer.Replace(placeholderToken.RawValue, tokenContent);
+                        }
+
                     }
 
+                    // Output completed file for next step
+                    fileOutput = masterBuffer;
                 }
-
-                // Output completed file for next step
-                fileOutput = masterBuffer;
+            }
+            else
+            {
+                // No master file being used, so just process the original child contents
+                fileOutput = childBuffer;
+                Log.Warning($"No {{master:}} token found for file {filePath}. Processing as standalone page.");
             }
 
             //
@@ -435,10 +445,10 @@ namespace Nitch
             else
             {
                 // If no file found, throw warning but do not error - this will let devs catch incorrect file references
-                Log.Warning($"File not found for token {fileToken.RawValue} at position {fileToken.PositionInFile.ToString()}");
+                Log.Warning($"File not found for token {fileToken.RawValue} in file '{currentFilePath}'.");
             }
 
-            return string.Empty;
+            return fileContents;
         }
         
         /// <summary>
