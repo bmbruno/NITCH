@@ -66,7 +66,6 @@ namespace Nitch
                     {
                         Token newToken = new Token()
                         {
-                            Type = Infrastructure.Enumerations.TokenType.Include,
                             Value = tokenValue,
                             RawValue = rawToken,
                             PositionInFile = startPos
