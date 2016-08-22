@@ -410,32 +410,6 @@ namespace Nitch
             return finalPath;
         }
 
-        // TODO: marked for removal
-        /// <summary>
-        /// Combines child page content into master page content via placeholder tokens.
-        /// </summary>
-        /// <param name="childPage">File contents (HTML) of child page.</param>
-        /// <param name="pathToMaster">Path to the master page that was defined on the given child page.</param>
-        /// <returns>File contents of combined pages. {{placeholder:}} token is removed from master page.</returns>
-        private string CombineMasterWithChild(string childPageContent, string pathToMaster)
-        {
-            string masterFilePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(pathToMaster));
-
-            if (!File.Exists(masterFilePath))
-                throw new FileNotFoundException($"No master file found at {pathToMaster}");
-
-            string masterContents = File.ReadAllText(masterFilePath);
-
-            // Get {{placeholder:}} token in master file and replace it with the childPage contents
-            Tokenizer placeholderTokens = new Tokenizer(masterContents);
-            placeholderTokens.ProcessToken("{{placeholder:}}");
-
-            if (placeholderTokens.Tokens.Count == 0)
-                throw new Exception($"No {{{{placeholder:}}}} token found in master file: {pathToMaster}");
-
-            return masterContents.Replace(placeholderTokens.Tokens[0].RawValue, childPageContent);
-        }
-
         /// <summary>
         /// Parses and renders a {{file:}} token value into an absolute or relative path for the HTML output.
         /// </summary>
