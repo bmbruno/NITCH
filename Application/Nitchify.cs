@@ -26,10 +26,17 @@ namespace Nitch
         /// </summary>
         private const string _MASTER_FILE_TEMPLATE = "master_";
 
+        /// <summary>
+        /// Filepath for the log file when written to disk.
+        /// </summary>
+        private const string _LOG_FILENAME = "_log.txt";
+
         #region Members
 
         private string _rootFolder { get; set; }
         
+        private Log _logger { get; set; }
+
         public PathingMode Pathing { get; set; }
 
         #endregion
@@ -54,6 +61,7 @@ namespace Nitch
             
             this._rootFolder = rootFolder;
             this.Pathing = pathing;
+            this._logger = new Log(true);
         }
 
         #endregion
@@ -63,10 +71,10 @@ namespace Nitch
         /// </summary>
         public void Build()
         {
-            Log.Info("Starting website build...");
+            this._logger.Info("Starting website build...");
 
-            Log.Info($"Root Folder: {_rootFolder}");
-            Log.Info($"File pathing: {Pathing.ToString()}");
+            this._logger.Info($"Root Folder: {_rootFolder}");
+            this._logger.Info($"File pathing: {Pathing.ToString()}");
             Console.Write("\n");
 
             // Load all HTML files in and under root directory
@@ -76,7 +84,7 @@ namespace Nitch
             // Step 1: Combine each file with master, process tokens, get output for each file
             foreach (string file in htmlFiles)
             {
-                Log.Info($"Building file: {file}");
+                this._logger.Info($"Building file: {file}");
                 OutputFile oFile = new OutputFile();
                 oFile.FilePath = file;
 
@@ -87,7 +95,7 @@ namespace Nitch
                 }
                 catch (Exception exc)
                 {
-                    Log.Exception(exc.Message, "Error building file.");
+                    this._logger.Exception(exc.Message, "Error building file.");
                 }
             }
 
@@ -103,7 +111,7 @@ namespace Nitch
             }
             catch (Exception exc)
             {
-                Log.Exception(exc.Message, "Error setting up output directory.");
+                this._logger.Exception(exc.Message, "Error setting up output directory.");
             }
 
             // Step 3: Write output HTML files to their proper locations
@@ -118,14 +126,16 @@ namespace Nitch
                 }
                 catch (Exception exc)
                 {
-                    Log.Exception(exc.Message, $"Error writing output file: {file.FilePath}");
+                    this._logger.Exception(exc.Message, $"Error writing output file: {file.FilePath}");
                 }
             }
 
             Console.Write("\n");
-            Log.Info($"Files built: {outputFiles.Count}");
-            Log.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
-            Log.Info("Build complete!");
+            this._logger.Info($"Files built: {outputFiles.Count}");
+            this._logger.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
+            this._logger.Info("Build complete!");
+
+            CloseLogFile();
         }
 
         /// <summary>
@@ -134,7 +144,7 @@ namespace Nitch
         /// <param name="startPath"></param>
         public void Create()
         {
-            Log.Info("Creating default website structure...");
+            this._logger.Info("Creating default website structure...");
 
             string newProjectFolder = "new_website_project";
             string[] rootFolders = { "master", "content" };
@@ -169,11 +179,11 @@ namespace Nitch
                         Directory.CreateDirectory(finalPath);
                 }
 
-                Log.Info("Created folders.");
+                this._logger.Info("Created folders.");
             }
             catch (Exception exc)
             {
-                Log.Exception(exc.ToString(), "Exception while creating folders.");
+                this._logger.Exception(exc.ToString(), "Exception while creating folders.");
             }
             
             try
@@ -192,15 +202,34 @@ namespace Nitch
                     File.WriteAllText(masterFilePath, DefaultFiles.masterHTML);
                 }
 
-                Log.Info("Created files.");
+                this._logger.Info("Created files.");
             }
             catch (Exception exc)
             {
-                Log.Exception(exc.ToString(), "Exception while creating HTML files.");
+                this._logger.Exception(exc.ToString(), "Exception while creating HTML files.");
             }
 
-            Log.Info($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
-            Log.Info("Creation complete!");
+            this._logger.Info($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
+            this._logger.Info("Creation complete!");
+
+            CloseLogFile();
+        }
+
+        /// <summary>
+        /// Writes the process log to disk.
+        /// </summary>
+        private void CloseLogFile()
+        {
+            string logPath = $"{_rootFolder}\\{_OUTPUT_DIR_NAME}\\{_LOG_FILENAME}";
+
+            try
+            {
+                this._logger.WriteLogToFile(logPath);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine($"Could not write log file to {logPath}. Exception: {exc.ToString()}");
+            }
         }
 
         /// <summary>
@@ -314,7 +343,7 @@ namespace Nitch
             {
                 // No master file being used, so just process the original child contents
                 fileOutput = childBuffer;
-                Log.Warning($"No {{master:}} token found for file {filePath}. Processing as standalone page.");
+                this._logger.Warning($"No {{master:}} token found for file {filePath}. Processing as standalone page.");
             }
 
             //
@@ -332,7 +361,7 @@ namespace Nitch
                 }
                 catch (Exception exc)
                 {
-                    Log.Exception(exc.Message.ToString(), $"Error compiling {{{{file:}}}} token at position {fileToken.PositionInFile.ToString()}.");
+                    this._logger.Exception(exc.Message.ToString(), $"Error compiling {{{{file:}}}} token at position {fileToken.PositionInFile.ToString()}.");
                 }
             }
             
@@ -445,7 +474,7 @@ namespace Nitch
             else
             {
                 // If no file found, throw warning but do not error - this will let devs catch incorrect file references
-                Log.Warning($"File not found for token {fileToken.RawValue} in file '{currentFilePath}'.");
+                this._logger.Warning($"File not found for token {fileToken.RawValue} in file '{currentFilePath}'.");
             }
 
             return fileContents;
