@@ -120,16 +120,34 @@
   <data name="indexHTML" xml:space="preserve">
     <value>{{master:"/master/master_main.html"}}
 
-&lt;div class="content"&gt;
+{{content:head}}
 
-	&lt;h1&gt;Hello, World!&lt;/h1&gt;
+	&lt;title&gt;Welcome to NITCH&lt;/title&gt;
 
-&lt;/div&gt;</value>
+{{content:end}}
+
+{{content:main}}
+	&lt;div class="content"&gt;
+
+		&lt;h1&gt;Hello, World!&lt;/h1&gt;
+
+	&lt;/div&gt;
+{{content:end}}
+
+{{content:footer_scripts}}
+
+	&lt;script&gt;
+	
+	&lt;/script&gt;
+
+{{content:end}}</value>
   </data>
   <data name="masterHTML" xml:space="preserve">
     <value>&lt;html&gt;
 
 	&lt;head&gt;
+	
+		{{placeholder:head}}
 	
 		&lt;link rel="stylesheet" href="" type="text/css" /&gt;
 	
@@ -137,11 +155,9 @@
 	
 	&lt;body&gt;
 	
-		{{placeholder:"main"}}
+		{{placeholder:main}}
 		
-		&lt;script&gt;
-		
-		&lt;/script&gt;
+		{{placeholder:footer_scripts}}
 		
 	&lt;/body&gt;
 		
