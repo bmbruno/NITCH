@@ -64,7 +64,7 @@ namespace Nitch
                     }
                     else
                     {
-                        // TODO: Run build in specified folder
+                        // Run build in specified folder
                         string startPath = parser.GetParam("build");
                         if (System.IO.Directory.Exists(startPath))
                         {
