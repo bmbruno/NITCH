@@ -8,7 +8,6 @@ namespace ParamParser
 {
     public class Parser
     {
-        // TODO: make this readonly as a public member
         public Dictionary<string, string> Parameters { get; set; }
 
         /// <summary>
