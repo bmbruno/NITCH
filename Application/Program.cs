@@ -29,7 +29,6 @@ namespace Nitch
 
             if (parser.Parameters.Count == 0)
             {
-                Console.Write("\n");
                 Console.Write(GetHelpText());
                 Console.Write("\n");
             }
@@ -86,9 +85,6 @@ namespace Nitch
                     }
                 }
             }
-
-            string input = Console.ReadLine();
-
         }
 
         static Infrastructure.Enumerations.PathingMode GetPathing(string paramValue)

@@ -102,11 +102,6 @@ namespace Nitch
             // Step 2: Copy all non-HTML and non-master files to new output directory (respecting folder structure)
             try
             {
-                // Always clear existing output and start fresh
-                string outputDir = Path.Combine(_rootFolder, _OUTPUT_DIR_NAME);
-                if (Directory.Exists(outputDir))
-                    Directory.Delete(outputDir, true);
-
                 CopyBaseFilesToOutputFolder(_rootFolder, _OUTPUT_DIR_NAME);
             }
             catch (Exception exc)
@@ -311,6 +306,7 @@ namespace Nitch
                         if (!IsValidContentTokenStructure(contentTokens.Tokens))
                             throw new Exception("Invalid {{content:}} token structure in file. Coult not find closing {{content:end}} token.");
 
+                        // Content tokens alternate between start/end, so we increment by 2 to only get the start tokens
                         for (int i = 0; i < contentTokens.Tokens.Count - 1; i += 2)
                         {
                             // Pull content from between the tokens
@@ -424,31 +420,27 @@ namespace Nitch
             // Verify file exists at given location in the token
             string filePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(fileToken.Value));
             
-            if (File.Exists(filePath))
-            {
-                // If yes (file found), then output its path (relative/absolute)
-                if (this.Pathing == PathingMode.Absolute)
-                {
-                    // All paths in source are required to be absolute from the website root, so just swap the token for that value
-                    fileContents = fileContents.Replace(fileToken.RawValue, fileToken.Value);
-                }
-                else if (this.Pathing == PathingMode.Relative)
-                {
-                    // Swap with a relative path
-                    string relativePath = GetRelativeFilePath(currentFilePath, fileToken.Value);
-                    fileContents = fileContents.Replace(fileToken.RawValue, relativePath);
-                }
-                else
-                {
-                    throw new Exception("Nitchify 'Pathing' is null. Pathing type cannot be determined.");
-                }
-
-                return fileContents;
-            }
-            else
+            if (!File.Exists(filePath))
             {
                 // If no file found, throw warning but do not error - this will let devs catch incorrect file references
                 this._logger.Warning($"File not found for token {fileToken.RawValue}.");
+            }
+
+            // Output its path (relative/absolute)
+            if (this.Pathing == PathingMode.Absolute)
+            {
+                // All paths in source are required to be absolute from the website root, so just swap the token for that value
+                fileContents = fileContents.Replace(fileToken.RawValue, fileToken.Value);
+            }
+            else if (this.Pathing == PathingMode.Relative)
+            {
+                // Swap with a relative path
+                string relativePath = GetRelativeFilePath(currentFilePath, fileToken.Value);
+                fileContents = fileContents.Replace(fileToken.RawValue, relativePath);
+            }
+            else
+            {
+                throw new Exception("Nitchify 'Pathing' is null. Pathing type cannot be determined.");
             }
 
             return fileContents;
