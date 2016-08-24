@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 
 namespace Nitch.Models
 {
-    public class Token
+    public class LogItem
     {
-        public string Value { get; set; }
+        public LogType Type { get; set; }
 
-        public string RawValue { get; set; }
-
-        public int PositionInFile { get; set; }
+        public string Message { get; set; }
     }
 }

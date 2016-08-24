@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Nitch.Infrastructure.Enumerations
 {
-    public enum TokenType
+    public enum LogType
     {
-        Include = 0,
-        File = 1
+        Info = 0,
+        Warning = 1,
+        Error = 3,
+        Exception = 4
     }
 }

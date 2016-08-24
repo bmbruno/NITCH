@@ -1,31 +1,100 @@
-﻿using System;
+﻿using Nitch.Infrastructure.Enumerations;
+using Nitch.Models;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Nitch.Infrastructure
 {
-    public static class Log
+    public class Log
     {
-        public static void Error(string message)
+        private List<LogItem> _logOutput { get; set; }
+
+        private bool _useConsole { get; set; }
+
+        public Log(bool useConsole = true)
         {
-            Console.WriteLine($"[ERROR] {message}");
+            _useConsole = useConsole;
+            _logOutput = new List<LogItem>();
         }
 
-        public static void Exception (string exceptionMessage, string message)
+        public bool HasErrors
         {
-            Console.WriteLine($"[EXCEPTION] {message} \n\n Exception Message: \n\n {exceptionMessage}");
+            get
+            {
+                return _logOutput.Any(u => u.Type == LogType.Exception || u.Type == LogType.Exception);
+            }
         }
 
-        public static void Warning (string message)
+        public string GetFormattedMessage(LogItem item)
         {
-            Console.WriteLine($"[WARNING] {message}");
+            return $"[{item.Type.ToString().ToUpper()}] {item.Message}";
         }
 
-        public static void Info(string message)
+        public void WriteLogToFile(string filePath)
         {
-            Console.WriteLine($"[INFO] {message}");
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+
+            List<String> output = new List<string>();
+
+            foreach (LogItem item in this._logOutput)
+            {
+                output.Add(this.GetFormattedMessage(item));
+            }
+
+            File.WriteAllLines(filePath, output.ToArray());
+        }
+
+        public void Error(string message)
+        {
+            _logOutput.Add(new LogItem()
+            {
+                Type = LogType.Error,
+                Message = message
+            });
+
+            if (this._useConsole)
+                Console.WriteLine($"[ERROR] {message}");
+        }
+
+        public void Exception (string exceptionMessage, string message)
+        {
+            _logOutput.Add(new LogItem()
+            {
+                Type = LogType.Exception,
+                Message = message
+            });
+
+            if (this._useConsole)
+                Console.WriteLine($"[EXCEPTION] {message} \n\n Exception Message: \n\n {exceptionMessage}");
+        }
+
+        public void Warning (string message)
+        {
+            _logOutput.Add(new LogItem()
+            {
+                Type = LogType.Warning,
+                Message = message
+            });
+
+            if (this._useConsole)
+                Console.WriteLine($"[WARNING] {message}");
+        }
+
+        public void Info(string message)
+        {
+            _logOutput.Add(new LogItem()
+            {
+                Type = LogType.Info,
+                Message = message
+            });
+
+            if (this._useConsole)
+                Console.WriteLine($"[INFO] {message}");
         }
     }
 }

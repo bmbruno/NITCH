@@ -63,11 +63,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DefaultFiles.resx</DependentUpon>
     </Compile>
-    <Compile Include="Infrastructure\Enumerations\TokenType.cs" />
+    <Compile Include="Infrastructure\Enumerations\LogType.cs" />
     <Compile Include="Infrastructure\Enumerations\PathingMode.cs" />
     <Compile Include="Infrastructure\Helpers\FileHelper.cs" />
     <Compile Include="Infrastructure\Helpers\StringExtensions.cs" />
     <Compile Include="Infrastructure\Log.cs" />
+    <Compile Include="Models\LogItem.cs" />
     <Compile Include="Models\OutputFile.cs" />
     <Compile Include="Models\Token.cs" />
     <Compile Include="Nitchify.cs" />

@@ -26,10 +26,17 @@ namespace Nitch
         /// </summary>
         private const string _MASTER_FILE_TEMPLATE = "master_";
 
+        /// <summary>
+        /// Filepath for the log file when written to disk.
+        /// </summary>
+        private const string _LOG_FILENAME = "_log.txt";
+
         #region Members
 
         private string _rootFolder { get; set; }
         
+        private Log _logger { get; set; }
+
         public PathingMode Pathing { get; set; }
 
         #endregion
@@ -54,6 +61,7 @@ namespace Nitch
             
             this._rootFolder = rootFolder;
             this.Pathing = pathing;
+            this._logger = new Log(true);
         }
 
         #endregion
@@ -63,10 +71,10 @@ namespace Nitch
         /// </summary>
         public void Build()
         {
-            Log.Info("Starting website build...");
+            this._logger.Info("Starting website build...");
 
-            Log.Info($"Root Folder: {_rootFolder}");
-            Log.Info($"File pathing: {Pathing.ToString()}");
+            this._logger.Info($"Root Folder: {_rootFolder}");
+            this._logger.Info($"File pathing: {Pathing.ToString()}");
             Console.Write("\n");
 
             // Load all HTML files in and under root directory
@@ -76,7 +84,7 @@ namespace Nitch
             // Step 1: Combine each file with master, process tokens, get output for each file
             foreach (string file in htmlFiles)
             {
-                Log.Info($"Building file: {file}");
+                this._logger.Info($"Building file: {file}");
                 OutputFile oFile = new OutputFile();
                 oFile.FilePath = file;
 
@@ -87,7 +95,7 @@ namespace Nitch
                 }
                 catch (Exception exc)
                 {
-                    Log.Exception(exc.Message, "Error building file.");
+                    this._logger.Exception(exc.Message, "Error building file.");
                 }
             }
 
@@ -103,7 +111,7 @@ namespace Nitch
             }
             catch (Exception exc)
             {
-                Log.Exception(exc.Message, "Error setting up output directory.");
+                this._logger.Exception(exc.Message, "Error setting up output directory.");
             }
 
             // Step 3: Write output HTML files to their proper locations
@@ -118,14 +126,16 @@ namespace Nitch
                 }
                 catch (Exception exc)
                 {
-                    Log.Exception(exc.Message, $"Error writing output file: {file.FilePath}");
+                    this._logger.Exception(exc.Message, $"Error writing output file: {file.FilePath}");
                 }
             }
 
             Console.Write("\n");
-            Log.Info($"Files built: {outputFiles.Count}");
-            Log.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
-            Log.Info("Build complete!");
+            this._logger.Info($"Files built: {outputFiles.Count}");
+            this._logger.Info($@"Output directory: {_rootFolder}\{_OUTPUT_DIR_NAME}");
+            this._logger.Info("Build complete!");
+
+            CloseLogFile();
         }
 
         /// <summary>
@@ -134,7 +144,7 @@ namespace Nitch
         /// <param name="startPath"></param>
         public void Create()
         {
-            Log.Info("Creating default website structure...");
+            this._logger.Info("Creating default website structure...");
 
             string newProjectFolder = "new_website_project";
             string[] rootFolders = { "master", "content" };
@@ -169,11 +179,11 @@ namespace Nitch
                         Directory.CreateDirectory(finalPath);
                 }
 
-                Log.Info("Created folders.");
+                this._logger.Info("Created folders.");
             }
             catch (Exception exc)
             {
-                Log.Exception(exc.ToString(), "Exception while creating folders.");
+                this._logger.Exception(exc.ToString(), "Exception while creating folders.");
             }
             
             try
@@ -192,15 +202,34 @@ namespace Nitch
                     File.WriteAllText(masterFilePath, DefaultFiles.masterHTML);
                 }
 
-                Log.Info("Created files.");
+                this._logger.Info("Created files.");
             }
             catch (Exception exc)
             {
-                Log.Exception(exc.ToString(), "Exception while creating HTML files.");
+                this._logger.Exception(exc.ToString(), "Exception while creating HTML files.");
             }
 
-            Log.Info($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
-            Log.Info("Creation complete!");
+            this._logger.Info($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
+            this._logger.Info("Creation complete!");
+
+            CloseLogFile();
+        }
+
+        /// <summary>
+        /// Writes the process log to disk.
+        /// </summary>
+        private void CloseLogFile()
+        {
+            string logPath = $"{_rootFolder}\\{_OUTPUT_DIR_NAME}\\{_LOG_FILENAME}";
+
+            try
+            {
+                this._logger.WriteLogToFile(logPath);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine($"Could not write log file to {logPath}. Exception: {exc.ToString()}");
+            }
         }
 
         /// <summary>
@@ -232,32 +261,99 @@ namespace Nitch
             string fileOutput = string.Empty;
 
             // Open 'filePath', read into buffer; empty files should not be processed
-            string fileBuffer = File.ReadAllText(filePath);
-
-            if (fileBuffer.Trim().Length == 0)
+            string childBuffer = File.ReadAllText(filePath);
+            
+            if (childBuffer.Trim().Length == 0)
                 return string.Empty;
 
-            // Scan for {{master:}} token; master file and its child page will need to be merged
-            Tokenizer tokensForMaster = new Tokenizer(fileBuffer);
-            tokensForMaster.ProcessToken("{{master:}}");
+            //
+            // Placeholder logic
+            //
 
-            // If {{master:}} token is found, load master file contents into buffer, find {{placeholder:}} token, and combine two files (replacement of {{placeholder:}} token with child page content)
-            if (tokensForMaster.Tokens.Count > 1)
-                throw new Exception("Only one {{master:}} token can be defined per file.");
-
-            if (tokensForMaster.Tokens.Count == 1)
-            {
-                fileOutput = CombineMasterWithChild(fileBuffer, tokensForMaster.Tokens[0].Value);
-
-                // Remove {{master:}} token from child page
-                fileOutput = fileOutput.Replace(tokensForMaster.Tokens[0].RawValue, string.Empty);
-            }
+            // Master file will have {{placeholder:}} tokens that need replaced with content
+            // Child file will have {{content:}} tokens that need replaced with content
             
-            // Process {{file:}} tokens in new file (respect absolute/relative pathing option)
-            Tokenizer tokensForFiles = new Tokenizer(fileOutput);
-            tokensForFiles.ProcessToken("{{file:}}");
+            Tokenizer masterTokens = new Tokenizer(childBuffer);
+            masterTokens.ProcessToken("{{master:}}");
 
-            foreach (Token fileToken in tokensForFiles.Tokens)
+            if (masterTokens.Tokens.Count > 0)
+            {
+
+                if (masterTokens.Tokens.Count > 1)
+                    throw new Exception("Only one {{master:}} token can be defined per file.");
+
+                string masterBuffer = string.Empty;
+
+                if (masterTokens.Tokens.Count == 1)
+                {
+                    // Load contents of master file
+                    string masterFilePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(masterTokens.Tokens[0].Value));
+
+                    if (!File.Exists(masterFilePath))
+                        throw new FileNotFoundException($"No master file found at {masterTokens.Tokens[0].Value}");
+
+                    masterBuffer = File.ReadAllText(masterFilePath);
+
+                    if (String.IsNullOrEmpty(masterBuffer))
+                        throw new Exception($"Master file cannot be empty. File: {masterFilePath}");
+
+                    // Load {{placeholder:}} tokens from master file
+                    Tokenizer placeholderTokens = new Tokenizer(masterBuffer);
+                    placeholderTokens.ProcessToken("{{placeholder:}}");
+
+                    // Scan child file for {{content:}} tokens; verify that all content tokens have an 'end' token
+                    Tokenizer contentTokens = new Tokenizer(childBuffer);
+                    contentTokens.ProcessToken("{{content:}}");
+
+                    if (contentTokens.Tokens.Count > 1)
+                    {
+                        // Verify structure of tokens (alternating start/end tokens)
+                        if (!IsValidContentTokenStructure(contentTokens.Tokens))
+                            throw new Exception("Invalid {{content:}} token structure in file. Coult not find closing {{content:end}} token.");
+
+                        for (int i = 0; i < contentTokens.Tokens.Count - 1; i += 2)
+                        {
+                            // Pull content from between the tokens
+                            int lengthOfContent = (contentTokens.Tokens[i + 1].PositionInFile - contentTokens.Tokens[i].PositionInFile);
+                            string tokenContent = childBuffer.Substring(contentTokens.Tokens[i].PositionInFile, lengthOfContent);
+
+                            // We don't want the raw token string in the copied content
+                            tokenContent = tokenContent.Replace(contentTokens.Tokens[i].RawValue, string.Empty);
+
+                            // Get the placeholder from master and insert the child content
+                            var queryResult = placeholderTokens.Tokens.Where(u => u.Value == contentTokens.Tokens[i].Value);
+
+                            if (queryResult.Count() == 0)
+                                throw new Exception($"No placeholder found for {{{{content:{contentTokens.Tokens[i].Value}}}}} token.");
+
+                            if (queryResult.Count() > 1)
+                                throw new Exception($"Cannot define multiple placeholders for the same {{{{content:{contentTokens.Tokens[i].Value}}}}} token.");
+
+                            Token placeholderToken = queryResult.First();
+                            masterBuffer = masterBuffer.Replace(placeholderToken.RawValue, tokenContent);
+                        }
+
+                    }
+
+                    // Output completed file for next step
+                    fileOutput = masterBuffer;
+                }
+            }
+            else
+            {
+                // No master file being used, so just process the original child contents
+                fileOutput = childBuffer;
+                this._logger.Warning($"No {{master:}} token found for file {filePath}. Processing as standalone page.");
+            }
+
+            //
+            // File tokens: Process {{file:}} tokens in new file (respect absolute/relative pathing option)
+            //
+
+            Tokenizer fileTokens = new Tokenizer(fileOutput);
+            fileTokens.ProcessToken("{{file:}}");
+
+            foreach (Token fileToken in fileTokens.Tokens)
             {
                 try
                 {
@@ -265,7 +361,7 @@ namespace Nitch
                 }
                 catch (Exception exc)
                 {
-                    Log.Exception(exc.Message.ToString(), $"Error compiling {{{{file:}}}} token at position {fileToken.PositionInFile.ToString()}.");
+                    this._logger.Exception(exc.Message.ToString(), $"Error compiling {{{{file:}}}} token at position {fileToken.PositionInFile.ToString()}.");
                 }
             }
             
@@ -315,31 +411,6 @@ namespace Nitch
         }
 
         /// <summary>
-        /// Combines child page content into master page content via placeholder tokens.
-        /// </summary>
-        /// <param name="childPage">File contents (HTML) of child page.</param>
-        /// <param name="pathToMaster">Path to the master page that was defined on the given child page.</param>
-        /// <returns>File contents of combined pages. {{placeholder:}} token is removed from master page.</returns>
-        private string CombineMasterWithChild(string childPageContent, string pathToMaster)
-        {
-            string masterFilePath = Path.Combine(_rootFolder, FileHelper.FormatForPathCombining(pathToMaster));
-
-            if (!File.Exists(masterFilePath))
-                throw new FileNotFoundException($"No master file found at {pathToMaster}");
-
-            string masterContents = File.ReadAllText(masterFilePath);
-
-            // Get {{placeholder:}} token in master file and replace it with the childPage contents
-            Tokenizer placeholderTokens = new Tokenizer(masterContents);
-            placeholderTokens.ProcessToken("{{placeholder:}}");
-
-            if (placeholderTokens.Tokens.Count == 0)
-                throw new Exception($"No {{{{placeholder:}}}} token found in master file: {pathToMaster}");
-
-            return masterContents.Replace(placeholderTokens.Tokens[0].RawValue, childPageContent);
-        }
-
-        /// <summary>
         /// Parses and renders a {{file:}} token value into an absolute or relative path for the HTML output.
         /// </summary>
         /// <param name="fileToken">Token object for File type.</param>
@@ -377,10 +448,10 @@ namespace Nitch
             else
             {
                 // If no file found, throw warning but do not error - this will let devs catch incorrect file references
-                Log.Warning($"File not found for token {fileToken.RawValue} at position {fileToken.PositionInFile.ToString()}");
+                this._logger.Warning($"File not found for token {fileToken.RawValue}.");
             }
 
-            return string.Empty;
+            return fileContents;
         }
         
         /// <summary>
@@ -394,6 +465,32 @@ namespace Nitch
             DirectoryInfo destinationInfo = new DirectoryInfo(Path.Combine(FileHelper.FormatForPathCombining(_rootFolder), FileHelper.FormatForPathCombining(_OUTPUT_DIR_NAME)));
 
             FileHelper.CopyAll(sourceInfo, destinationInfo, _MASTER_FILE_TEMPLATE, _OUTPUT_DIR_NAME);
+        }
+
+        /// <summary>
+        /// Validates that a token list represents a valid structure of paired-tokens. Valid structure: Odd tokens are {{content:name}} and even tokens are {{content:end}}, where 'name' is an identifier.
+        /// </summary>
+        /// <param name="tokenList">List of Token objects to validate.</param>
+        /// <returns>True if valid, false if invalid.</returns>
+        private bool IsValidContentTokenStructure(List<Token> tokenList)
+        {
+            bool isValid = true;
+            int position = 0;
+
+            // Should be an even number of objects
+            if (tokenList.Count % 2 > 0)
+                isValid = false;
+
+            while (isValid && (position < tokenList.Count - 1))
+            {
+                // Every other {{content:}} token should be an "end" token like {{content:end}}
+                if (!tokenList[position + 1].RawValue.EndsWith(":end}}"))
+                    isValid = false;
+                
+                position += 2;
+            }
+
+            return isValid;
         }
     }
 }

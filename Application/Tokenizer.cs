@@ -64,7 +64,6 @@ namespace Nitch
                     {
                         Token newToken = new Token()
                         {
-                            Type = Infrastructure.Enumerations.TokenType.Include,
                             Value = tokenValue,
                             RawValue = rawToken,
                             PositionInFile = startPos
@@ -74,12 +73,12 @@ namespace Nitch
                     }
                     else
                     {
-                        Log.Warning($"Token parse error at position: {startPos}");
+                        throw new Exception($"Token parse error at position: {startPos}");
                     }
                 }
                 else
                 {
-                    Log.Warning($"Invalid token at position: {startPos.ToString()}");
+                    throw new Exception($"Invalid token at position: {startPos.ToString()}");
                 }
             }
         }

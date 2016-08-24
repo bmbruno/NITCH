@@ -63,11 +63,27 @@ namespace Nitch.Infrastructure {
         /// <summary>
         ///   Looks up a localized string similar to {{master:&quot;/master/master_main.html&quot;}}
         ///
-        ///&lt;div class=&quot;content&quot;&gt;
+        ///{{content:head}}
         ///
-        ///	&lt;h1&gt;Hello, World!&lt;/h1&gt;
+        ///	&lt;title&gt;Welcome to NITCH&lt;/title&gt;
         ///
-        ///&lt;/div&gt;.
+        ///{{content:end}}
+        ///
+        ///{{content:main}}
+        ///	&lt;div class=&quot;content&quot;&gt;
+        ///
+        ///		&lt;h1&gt;Hello, World!&lt;/h1&gt;
+        ///
+        ///	&lt;/div&gt;
+        ///{{content:end}}
+        ///
+        ///{{content:footer_scripts}}
+        ///
+        ///	&lt;script&gt;
+        ///	
+        ///	&lt;/script&gt;
+        ///
+        ///{{content:end}}.
         /// </summary>
         internal static string indexHTML {
             get {
@@ -80,17 +96,17 @@ namespace Nitch.Infrastructure {
         ///
         ///	&lt;head&gt;
         ///	
+        ///		{{placeholder:head}}
+        ///	
         ///		&lt;link rel=&quot;stylesheet&quot; href=&quot;&quot; type=&quot;text/css&quot; /&gt;
         ///	
         ///	&lt;/head&gt;
         ///	
         ///	&lt;body&gt;
         ///	
-        ///		{{placeholder:&quot;main&quot;}}
+        ///		{{placeholder:main}}
         ///		
-        ///		&lt;script&gt;
-        ///		
-        ///		&lt;/script&gt;
+        ///		{{placeholder:footer_scripts}}
         ///		
         ///	&lt;/body&gt;
         ///		
