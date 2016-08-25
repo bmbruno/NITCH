@@ -339,7 +339,7 @@ namespace Nitch
             {
                 // No master file being used, so just process the original child contents
                 fileOutput = childBuffer;
-                this._logger.Warning($"No {{master:}} token found for file {filePath}. Processing as standalone page.");
+                this._logger.Warning($"No {{{{master:}}}} token found for file {filePath}. Processing as standalone page.");
             }
 
             //
