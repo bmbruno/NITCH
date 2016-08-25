@@ -66,7 +66,7 @@ namespace Nitch.Infrastructure
             _logOutput.Add(new LogItem()
             {
                 Type = LogType.Exception,
-                Message = message
+                Message = $"{message} EXCEPTION: {exceptionMessage}"
             });
 
             if (this._useConsole)
