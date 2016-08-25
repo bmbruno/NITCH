@@ -14,7 +14,7 @@ namespace Nitch
     {
         static void Main(string[] args)
         {
-            string AppVersion = "0.98";
+            string AppVersion = "1.00";
             string appPath = Infrastructure.Helpers.FileHelper.GetCurrentApplicationDirectory();
 
             Console.WriteLine("NITCH (.NET Integrated Template Compiler for HTML)");

@@ -304,7 +304,7 @@ namespace Nitch
                     {
                         // Verify structure of tokens (alternating start/end tokens)
                         if (!IsValidContentTokenStructure(contentTokens.Tokens))
-                            throw new Exception("Invalid {{content:}} token structure in file. Coult not find closing {{content:end}} token.");
+                            throw new Exception("Invalid {{content:}} token structure in file. Could not find closing {{content:end}} token.");
 
                         // Content tokens alternate between start/end, so we increment by 2 to only get the start tokens
                         for (int i = 0; i < contentTokens.Tokens.Count - 1; i += 2)
