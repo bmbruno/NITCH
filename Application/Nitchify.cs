@@ -204,6 +204,8 @@ namespace Nitch
                     File.WriteAllText(buildFilePath, DefaultFiles.buildBatch);
                 }
 
+                this._logger.Info($"Created build file: {buildFilePath}");
+
                 this._logger.Info("Created files.");
             }
             catch (Exception exc)
