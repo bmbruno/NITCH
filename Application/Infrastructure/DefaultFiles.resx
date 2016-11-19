@@ -117,8 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="buildBatch" xml:space="preserve">
+    <value>nitch.exe -build "new_website_project"
+pause</value>
+  </data>
   <data name="indexHTML" xml:space="preserve">
-    <value>{{master:"/master/master_main.html"}}
+    <value>{{master:/master/master_main.html}}
 
 {{content:head}}
 

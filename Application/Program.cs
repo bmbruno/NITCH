@@ -73,7 +73,6 @@ namespace Nitch
                         string startPath = parser.GetParam("build");
                         if (System.IO.Directory.Exists(startPath))
                         {
-                            // Nitchify builder = new Nitchify(startPath, Infrastructure.Enumerations.PathingMode.Absolute);
                             Nitchify builder = new Nitchify(startPath, pathingMode);
                             builder.Build();
                         }

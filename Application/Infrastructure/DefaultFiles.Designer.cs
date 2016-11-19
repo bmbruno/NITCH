@@ -61,7 +61,17 @@ namespace Nitch.Infrastructure {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {{master:&quot;/master/master_main.html&quot;}}
+        ///   Looks up a localized string similar to nitch.exe -build &quot;new_website_project&quot;
+        ///pause.
+        /// </summary>
+        internal static string buildBatch {
+            get {
+                return ResourceManager.GetString("buildBatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {{master:/master/master_main.html}}
         ///
         ///{{content:head}}
         ///

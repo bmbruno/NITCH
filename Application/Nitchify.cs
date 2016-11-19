@@ -197,6 +197,13 @@ namespace Nitch
                     File.WriteAllText(masterFilePath, DefaultFiles.masterHTML);
                 }
 
+                // build file (batch)
+                string buildFilePath = Path.Combine(_rootFolder, "build.bat");
+                if (!File.Exists(buildFilePath))
+                {
+                    File.WriteAllText(buildFilePath, DefaultFiles.buildBatch);
+                }
+
                 this._logger.Info("Created files.");
             }
             catch (Exception exc)
