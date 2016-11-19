@@ -1,9 +1,12 @@
 .NET Integrated Template Compiler for HTML (Nitch)
+v1.00
 
 About
 -----
 
+Nitch is a static site generator that compiles HTML files based on a basic parent-child relationship. "Master" pages are bound to "child" pages via a simple token syntax.
 
+To get started quickly, run "nitch.exe /create" to get a blank sample site set up.
 
 Using Nitch
 -----------

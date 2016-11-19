@@ -207,19 +207,39 @@ namespace Nitch
             this._logger.Info($@"New directory: {Path.Combine(_rootFolder, newProjectFolder)}");
             this._logger.Info("Creation complete!");
 
-            CloseLogFile();
+            CloseLogFile(@".\");
         }
 
         /// <summary>
         /// Writes the process log to disk.
         /// </summary>
-        private void CloseLogFile()
+        /// <param name="outputDir">Absolute or relative path to output directory. Ex: ".\" or "C:\nitch\".</param>
+        private void CloseLogFile(string outputDir = "")
         {
+            // Default output path when building a website
             string logPath = $"{_rootFolder}\\{_OUTPUT_DIR_NAME}\\{_LOG_FILENAME}";
+
+            // Optional override (for non-build related activities)
+            if (!String.IsNullOrEmpty(outputDir))
+                logPath = $"{outputDir}{_LOG_FILENAME}";
 
             try
             {
                 this._logger.WriteLogToFile(logPath);
+            }
+            catch (DirectoryNotFoundException dirExc)
+            {
+                // Try writing next to executable
+                logPath = $"{_LOG_FILENAME}";
+
+                try
+                {
+                    this._logger.WriteLogToFile(logPath);
+                }
+                catch (Exception exc)
+                {
+                    Console.WriteLine($"Could not write local log file in root directory. Exception: {exc.ToString()}");
+                }
             }
             catch (Exception exc)
             {
