@@ -22,6 +22,7 @@ Windows 7, 8, or 10
 These are the tokens you can use in your source files:
 
 **Master**
+
 Example usage: `{{master:/location/of/file.html}}`
 
 * Defines what master file belongs to the child page.
@@ -29,12 +30,14 @@ Example usage: `{{master:/location/of/file.html}}`
 * Must be absolute path from the project root.
 
 **File**
+
 Example usage: `{{file:/path/to/file.png}}`
 
 * Defines a file path to a resource (CSS, JS, images, etc.).
 * Must be absolute path from the project root.
 
 **Placeholder**
+
 Exmaple usage: `{{placeholder:name}}`
 
 * Defines a placeholder for content on a Master page.
@@ -74,8 +77,9 @@ Builds all HTML files in and under the specified directory.
 
 `nitch.exe /pathing [ rel | abs ]`
 Defines how file paths should be generated:
-`rel` - relative pathing is used; example output: `../../images/logo.png`
-`abs` - absolute pathing is used; example output: `/sections/core/images/logo.png`
+
+* `rel` - relative pathing is used; example output: `../../images/logo.png`
+* `abs` - absolute pathing is used; example output: `/sections/core/images/logo.png`
 
 In general, you can use relative pathing ('rel') to preview your website from the local filesystem, and use absolute pathing ('abs') for viewing/hosting on a web server.
 	
