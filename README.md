@@ -43,6 +43,7 @@ Exmaple usage: `{{placeholder:name}}`
 * Defines a placeholder for content on a Master page.
 
 **Content**
+
 Example Usage: `{{content:name}} <!-- CONTENT HERE --> {{content:end}}`
 
 * Defines a region for content to be inserted into a Master page.
